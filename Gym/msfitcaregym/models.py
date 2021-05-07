@@ -6,7 +6,7 @@ import datetime
 
 # Create your models here.
 class HomePageText(models.Model):
-    text = models.TextField(max_length=5000, null= True, blank=True)
+    text = models.TextField(max_length=6000, null= True, blank=True)
     def __str__(self):
         return '{}'.format(self.text)
 
