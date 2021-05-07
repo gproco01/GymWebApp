@@ -1,0 +1,494 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+
+{% block title %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=yes">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+<!--    <link rel="stylesheet" href="{% static 'fonts1/fontawesome-all.min.css' %}">-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <link rel="stylesheet" href="{% static 'fullcalendar/main.css'%}">
+    <script src="{% static 'fullcalendar/main.js'%}"></script>
+    <script src="{% static 'fullcalendar/locales/el.js' %}"></script>
+
+{% endblock %}
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+{% block body_block %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                // touchSelect:true,
+                contentHeight: 'auto',
+                editable: true,
+                eventOverlap: true,
+                selectable: true,
+                slotEventOverlap: false,
+                initialView: 'timeGridWeek',
+                scrollTime: '06:00:00',
+                slotMinTime:'06:00:00',
+                slotMaxTime:'22:00:00',
+                allDaySlot: false,
+                // selectConstraint: {
+                //    start: moment().format('YYYY-MM-DD'),
+                // },
+                // eventConstraint: {
+                //   start: moment().format('YYYY-MM-DD'),
+                // },
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                titleFormat: {
+                    month: 'short',
+                    year: 'numeric',
+                },
+                dayMaxEventRows: true,
+                views: {
+                    timeGrid: {
+                      dayMaxEventRows: true // adjust to 6 only for timeGridWeek/timeGridDay
+                    }
+                },
+                eventSources: [
+
+                    // your event source
+                    {
+                      url: "{%url 'msfitcaregym:physioSlots' %}",
+                      method: 'POST',
+                      extraParams:function() {
+                          return {
+                              csrfmiddlewaretoken: '{{ csrf_token }}',
+                              status:'free',
+                              user:'admin'
+                          }
+                      },
+                      failure: function(error) {
+                        alert('Παρουσιάστηκε σφάλμα!');
+                      },
+                      color: 'green',   // a non-ajax option
+
+                    },
+                    {
+                      url: "{%url 'msfitcaregym:physioSlots' %}",
+                      method: 'POST',
+                      extraParams:function() {
+                          return {
+                              csrfmiddlewaretoken: '{{ csrf_token }}',
+                              status:'reserved',
+                              user:'admin'
+                          }
+                      },
+                      failure: function(error) {
+                        alert('Παρουσιάστηκε σφάλμα!');
+                      },
+                      color: 'red',   // a non-ajax option
+
+                    },
+                ],
+                select: function (info){
+                    var slot_date = moment(info.start).format("Y-MM-DD");
+                    start_time=moment(info.start).format("HH:mm");
+                    end_time=moment(info.end).format("HH:mm");
+                    ans=confirm("Προσθήκη ραντεβού μεταξύ "+ start_time + "-"+end_time)
+                    if (ans==true) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{%url 'msfitcaregym:physioSlotsAdd' %}",
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                'date': slot_date,
+                                'start_time': start_time,
+                                'end_time': end_time
+                            },
+                            dataType: "json",
+                            success: function (data) {
+                                calendar.refetchEvents();
+                                // alert('Event Added');
+                            },
+                            failure: function (data) {
+                                calendar.refetchEvents();
+                                alert('Παρουσιάστηκε σφάλμα!');
+                            }
+                        });
+                    }
+                },
+                eventResize: function (info) {
+                    var start_date
+                    var start_time=null
+                    var end_date
+                    var end_time=null
+
+                    start_date = moment(info.event.start).format("Y-MM-DD");
+                    start_time=moment(info.event.start).format("HH:mm:ss");
+                    if (info.event.end==null) {
+                        end_time = moment(info.event.start).add(1,'hours').format("HH:mm:ss");
+                        end_date = moment(info.event.start).format("Y-MM-DD");
+                    }
+                    else {
+                        end_time = moment(info.event.end).format("HH:mm:ss");
+                        end_date = moment(info.event.end).format("Y-MM-DD");
+                    }
+                    // var title = info.event.title;
+                    var id = info.event.id;
+                    if (info.event.end==null){
+                        info.event.setEnd(end_date+" "+end_time)
+                    }
+
+                    $.ajax({
+                        type: "POST",
+                        url: "{%url 'msfitcaregym:physioSlotUpdate' %}",
+                        data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'date': start_date, 'start_time': start_time, 'end_time': end_time, 'id': id},
+                        dataType: "json",
+                        success: function (data) {
+                            calendar.refetchEvents();
+                            // alert('Event Update');
+                        },
+                        failure: function (data) {
+                            calendar.refetchEvents();
+                            alert('Παρουσιάστηκε σφάλμα!');
+                        }
+                    });
+                },
+                eventDrop: function (info) {
+                    var start_date
+                    var start_time=null
+                    var end_date
+                    var end_time=null
+                    // var start = FullCalendar.formatDate(info.event.start, "Y-MM-DD HH:mm:ss")
+                    if (info.event.allDay!=true){
+                        start_date = moment(info.event.start).format("Y-MM-DD");
+                        start_time=moment(info.event.start).format("HH:mm:ss");
+                        if (info.event.end==null) {
+                            var end=moment(info.event.start).add(4,'hours')
+                            end_time = end.format("HH:mm:ss");
+                            end_date = end.format("Y-MM-DD");
+                        }
+                        else {
+                            end_time = moment(info.event.end).format("HH:mm:ss");
+                            end_date = moment(info.event.end).format("Y-MM-DD");
+                        }
+                    }else {
+                        start_date = moment(info.event.start).format("Y-MM-DD");
+                        end_date = moment(info.event.start).add(1,"days").format("Y-MM-DD");
+                    }
+                    // var title = info.event.title;
+                    var id = info.event.id;
+                    if (info.event.end==null){
+                        info.event.setEnd(end_date+" "+end_time)
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "{%url 'msfitcaregym:physioSlotUpdate' %}",
+                        data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'date': start_date, 'start_time': start_time, 'end_time': end_time, 'id': id},
+                        dataType: "json",
+                        success: function (data) {
+                            calendar.refetchEvents();
+                            // alert('Event Update');
+                        },
+                        failure: function (data) {
+                            alert('Παρουσιάστηκε σφάλμα!');
+                            calendar.refetchEvents();
+                        }
+                    });
+                },
+                eventClick: function (info) {
+                    var id = info.event.id;
+                    if (info.event.extendedProps.isReserved) {
+                        document.getElementById('user').innerHTML=info.event.title
+                        document.getElementById('user_id').value=info.event.extendedProps.user_id
+                        var modal = document.getElementById("reserved");
+                        // Get the <span> element that closes the modal
+                        modal.style.display = "block";
+
+                        var del = document.getElementById("deleteUser");
+                        // Get the <span> element that closes the modal
+                        del.onclick = function () {
+                            deleteUser()
+                            modal.style.display = "none";
+                        };
+                    } else {
+                        document.getElementById('slot_id').value=id
+                        var modal = document.getElementById("free");
+                        // Get the <span> element that closes the modal
+                        modal.style.display = "block";
+
+                        var del = document.getElementById("deleteSlot");
+                        // Get the <span> element that closes the modal
+                        del.onclick = function () {
+                            deleteSlot()
+                            modal.style.display = "none";
+                        };
+                    }
+
+
+                    function deleteUser(){
+                        if (confirm("Είστε σίγουροι πως θέλετε να διαγράψετε την κράτηση?")) {
+
+                            $.ajax({
+                                type: "POST",
+                                url: "{%url 'msfitcaregym:physioUserDelete' %}",
+                                data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'id': id},
+                                dataType: "json",
+                                success: function (data) {
+                                    // info.event.remove()
+                                    calendar.refetchEvents();
+                                    // alert('User reservation removed');
+                                },
+                                failure: function (data) {
+                                    alert('Παρουσιάστηκε σφάλμα!');
+                                    calendar.refetchEvents();
+                                }
+                            })
+                        }
+                    }
+
+                    function deleteSlot(){
+                        if (confirm("Είστε σίγουροι πως θέλετε να διαγράψετε το διαθέσιμο ραντεβού?")) {
+                            var id = info.event.id;
+                            $.ajax({
+                                type: "POST",
+                                url: "{%url 'msfitcaregym:physioSlotDelete' %}",
+                                data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'id': id},
+                                dataType: "json",
+                                success: function (data) {
+                                    // info.event.remove()
+                                    calendar.refetchEvents();
+                                    // alert('Slot removed');
+                                },
+                                failure: function (data) {
+                                    alert('Παρουσιάστηκε σφάλμα!');
+                                    calendar.refetchEvents();
+                                }
+                            })
+                        }
+                    }
+                },
+        });
+
+            calendar.render();
+            calendar.setOption('locale', 'el');
+
+        });
+</script>
+<section class="page-section rounded" style="background-color: hsla(0,0%,100%,.95);">
+    <div class="card-header py-3">
+        <p class="text-primary m-0 font-weight-bold">Φυσιοθεραπευτήριο</p>
+    </div>
+    <br>
+    <div id='calendar'></div>
+</section>
+
+<!-- The Modal -->
+<div id="free" class="modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+          <div class="modal-header">
+            <h4 class="modal-title">Επιλογές:</h4>
+          </div>
+            <div class="modal-body" id="addUser" style="display: none">
+                <form action="/physio/admin/addUser/" class="uniForm blueForms" method="post" id="departure_form">
+                    {% csrf_token %}
+                    <input type="hidden" id="slot_id" name="id" value="">
+                    <label for="user">Επέλεξε χρήστη:</label>
+                    <select name="select_user" id="select_user" required>
+                        {% for user in users %}
+                            <option value="{{user.id}}">{{user.user.first_name}} {{user.user.last_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">Καταχώρηση</button>
+                </form>
+
+            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Κλείσιμο</button>
+            <button id="deleteSlot" type="button" class="btn btn-primary">Διαγραφή ραντεβού</button>
+            <button type="button" class="btn btn-primary" onclick="showForm('addUser')">Προσθήκη χρήστη</button>
+          </div>
+        </div>
+      </div>
+</div>
+
+<!-- The Modal -->
+<div id="reserved" class="modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+          <div class="modal-header">
+            <h4 class="modal-title" id="user">Επιλογές:</h4>
+              <input type="hidden" id="user_id">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Κλείσιμο</button>
+            <button id="deleteUser" type="button" class="btn btn-primary">Διαγραφή χρήστη</button>
+            <button id="userCard" type="button" class="btn btn-primary" onclick="showForm('card')">Κάρτα</button>
+              <div class="row" id="card" style="display: none">
+                  <button id="newCard" type="button" class="btn btn-primary" onclick="newCard()">Νέα Κάρτα</button>
+                  <button id="oldCard" type="button" class="btn btn-primary" onclick="oldCard()">Υπάρχων Κάρτα</button>
+              </div>
+<!--            <button id="schedule" type="button" class="btn btn-primary">Schedule</button>-->
+          </div>
+        </div>
+      </div>
+</div>
+
+
+{% endblock %}
+{% block footer %}
+
+<script>
+    function showForm(name) {
+      var x = document.getElementById(name);
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    }
+</script>
+<script>
+    function newCard(){
+        user=document.getElementById('user_id').value
+        title=prompt("Title")
+        if (title!=null && title!=""){
+            console.log(user,title)
+            url="/newCard/"
+            $.ajax({
+                type: "POST",
+                url: "{%url 'msfitcaregym:physioNewCard' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    'user': user,
+                    'title': title,
+                },
+                dataType: "json",
+                success: function (data) {
+                    var url = "{% url 'msfitcaregym:humanbody1' 123 %}"
+                    document.location.href = url.replace('123', data.card_id);
+
+                },
+                failure: function (data) {
+                    calendar.refetchEvents();
+                    alert('Παρουσιάστηκε σφάλμα!');
+                }
+            });
+        }
+
+    }
+
+    function oldCard() {
+        user=document.getElementById('user_id').value
+        var url = "{% url 'msfitcaregym:userCards' 123 %}"
+        document.location.href = url.replace('123', user);
+    }
+</script>
+
+<script src="{% static 'js/bootstrap-multiselect.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-multiselect.css' %}">
+<script>
+    document.getElementById('select_user').selectedIndex=-1
+    $( document ).ready(function() {
+        $('#select_user').multiselect({
+          maxHeight: 300,
+          enableCollapsibleOptGroups: true,
+          enableClickableOptGroups: true,
+          enableFiltering: true,
+          enableCaseInsensitiveFiltering: true,
+          filterBehavior: 'text',
+          // filterPlaceholder: 'Όνομα Κινδύνου',
+          nonSelectedText: 'Καμία επιλογή',
+          buttonWidth: '400px',
+          nSelectedText: 'Επιλογές',
+          allSelectedText: 'Όλες οι Επιλογές',
+          numberDisplayed: 1
+        });
+    });
+</script>
+
+<script>
+    var modal = document.getElementById("free");
+    var modal1 = document.getElementById("reserved");
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+      modal.style.display = "none";
+      modal1.style.display = "none";
+    }
+    var close = document.getElementsByClassName("btn btn-default")[0];
+    // When the user clicks close, close the modal
+    close.onclick = function() {
+      modal.style.display = "none";
+      modal1.style.display = "none";
+    }
+
+    var span = document.getElementsByClassName("close")[1];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+      modal.style.display = "none";
+      modal1.style.display = "none";
+    }
+    var close = document.getElementsByClassName("btn btn-default")[1];
+    // When the user clicks close, close the modal
+    close.onclick = function() {
+      modal.style.display = "none";
+      modal1.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal || event.target == modal1) {
+        modal.style.display = "none";
+        modal1.style.display = "none";
+      }
+    }
+</script>
+
+<style>
+    /* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 100; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+    /* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'msfitcaregym/base.html' %}
+{%load static%}
+{% block title %}
+<title>Announcements</title>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+    <section class="page-section cta" style="background-color: rgba(0, 0, 0, 1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+                    <div class="cta-inner text-center rounded">
+                        <h2 class="section-heading mb-5"><span class="section-heading-upper">ΑΝΑΚΟΙΝΩΣΕΙΣ</span></h2>
+                        <ul class="list-unstyled mx-auto list-hours mb-5 text-left">
+                            {% for a in announcements %}
+                            <li class="d-flex list-unstyled-item ">{{a.submited_date}}<a class="ml-auto" href="" data-toggle="modal" data-target="#exampleModal" onclick="getvalue('{{a.title}}','{{a.details}}','{{a.submited_date}}')">{{a.title}}</a>
+                                {%if request.user.groups.all.0.name == 'admin'%}
+                            <a class="btn btn-danger" onclick="deleteSlot('{{a.pk}}')" >−</a>
+                            {%endif%}</li><hr>
+                            {%endfor%}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {%if request.user.groups.all.0.name == 'admin'%}
+            <button data-toggle="modal" data-target="#exampleModal1" class="btn btn-success">Προσθήκη Ανακοίνωσης</button>
+         {%endif%}
+    </section>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="modalbody">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Κλείσιμο</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Προσθήκη Ανακοίνωσης</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+           <form enctype="multipart/form-data" class="user" method="post" >
+              {%csrf_token%}
+              <div class="modal-body">
+                {{form.as_p}}
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
+                  <input type="submit" class="btn btn-primary" style="background-color: #e6a756!important;" value="Αποθήκευση">
+              </div>
+           </form>
+        </div>
+      </div>
+</div>
+<script>
+    function getvalue(title,details,date){
+        console.log(title);
+        var x = document.getElementById('exampleModalLabel')
+        x.innerText = title;
+        var y = document.getElementById('modalbody')
+        y.innerHTML = details;
+    }
+    function deleteSlot(pk){
+        console.log(pk)
+        if (confirm("Είστε σίγουροι ότι θέλετε να το διαγράψετε;")) {
+            var url = "{% url 'msfitcaregym:removeannouncement' 123 %}"
+            document.location.href = url.replace('123', pk);
+        }
+    }
+
+</script>
+
+{% endblock %}

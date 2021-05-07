@@ -1,0 +1,103 @@
+{% extends 'msfitcaregym/base.html' %}
+{%load static%}
+{% block title %}
+<title>Working Hours</title>
+<script src="https://kit.fontawesome.com/23f23a60cc.js" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+    <section class="page-section cta" style="background-color: rgba(0, 0, 0, 1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+                    <div class="cta-inner text-center rounded">
+                        <h2 class="section-heading mb-5"><span class="section-heading-upper">Ωρες Λειτουργιας</span><span class="section-heading-lower"></span></h2>
+                        <ul class="list-unstyled mx-auto list-hours mb-5 text-left">
+                            {%for h in hours%}
+                            <li class="d-flex list-unstyled-item list-hours-item">{{h.day}}<span class="ml-auto">{{h.time}}</span>
+                            {%if request.user.groups.all.0.name == 'admin'%}
+                                <span>&nbsp;&nbsp;</span>
+                            <button data-toggle="modal" data-target="#exampleModal" class="btn btn-success" onclick="openmodal('{{h.pk}}','{{h.day}}','{{h.time}}')">Επεξεργασία</button>
+                            {%endif%}
+                            </li>
+                            {%endfor%}
+                        </ul>
+                    </div>
+                    <br>
+                    <div class="col-md-10 col-lg-8 mx-auto cta-inner text-center rounded">
+                    <h2 class="list-inline text-center">Στοιχεία Επικοινωνίας</h2>
+                    <ul class="list-inline text-center">
+                        <li class="list-inline-item"><a href="tel:99481883"><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fas fa-phone-square-alt fa-stack-1x fa-inverse"></i></span></a></li>
+                        <li class="list-inline-item"><a href="https://www.facebook.com/profile.php?id=100005385466576"><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-facebook fa-stack-1x fa-inverse"></i></span></a></li>
+                        <li class="list-inline-item"><a href="http://maps.google.com/?q=34.988023, 33.859832" ><span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-2x"></i><i class="fas fa-map-marked-alt fa-stack-1x fa-inverse" ></i></span></a></li>
+                    </ul>
+                        <p>Τηλέφωνο : 99481883</p>
+                        <p>Διεύθυνση : Νίκου Θεοφάνους 7520 Ξυλοφάγου</p>
+                        <p>Email: </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<div id="dmodal" class="modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Καταχώρηση</h4>
+          </div>
+            <div class="modal-content">
+              <form id = 'dphysio'>
+                <input type="hidden" id="id_day" name="id_day">
+                  <label>Μέρα</label>
+                <input type="text" id="day" name="day">
+                  <label>Ώρες</label>
+                  <input type="text" id="time" name="time">
+              </form>
+            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="dclose">Κλείσιμο</button>
+            <button id="saveold" type="button" class="btn btn-primary" onclick="saveday()">Αποθήκευση</button>
+          </div>
+        </div>
+      </div>
+</div>
+
+<script>
+    var modal1 = document.getElementById("dmodal");
+    // Get the <span> element that closes the modal
+    var close1 = document.getElementById('dclose');
+    // When the user clicks close, close the modal
+    close1.onclick = function() {
+        modal1.style.display = "none";
+    }
+    function openmodal(id,day,time) {
+        var m = document.getElementById("dmodal")
+        m.style.display = "block";
+        document.getElementById('id_day').value = id
+        document.getElementById('day').value = day
+        document.getElementById('time').value = time
+    }
+    function saveday(){
+        $.ajax({
+            type: 'POST',
+            url: "{%url 'msfitcaregym:savehours' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                id_day: document.getElementById('id_day').value,
+                day: document.getElementById('day').value,
+                time: document.getElementById('time').value,
+            },
+            dataType: "json",
+            success: function (data) {
+                modal1.style.display = "none";
+                location.reload();
+            }
+       });
+    }
+</script>
+{% endblock %}

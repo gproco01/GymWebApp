@@ -1,0 +1,130 @@
+{% extends 'msfitcaregym/base.html' %}
+{%load static%}
+{% load crispy_forms_tags %}
+{% block title %}
+<title>User's Program</title>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{% static 'js/bootstrap-multiselect.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-multiselect.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.0.4/jscolor.js"></script>
+
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(0, 0, 0, 0.1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+                    <div class="cta-inner text-center rounded">
+						<form class="user" method="post">
+                         {%csrf_token%}
+							{% if messages %}
+                                {% for message in messages %}
+                                    <p class="{{ message.tags }}" style="color: red;">
+                                    {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                                    </p>
+                                {% endfor %}
+                                {% endif %}
+						<fieldset>
+						{{ form.non_field_errors }}
+						<div class="row">
+						  <div class="col-sm-6 mb-3 mb-sm-0 container">
+							{{ programday.title|as_crispy_field }}
+						  </div>
+						  <div class="col-sm-6 mb-3 mb-sm-0" hidden>
+							{{ programday.program|as_crispy_field }}
+						  </div>
+					   </div>
+				</fieldset>
+				<fieldset>
+						<legend>Ασκήσεις</legend>
+						{{ ex_form.management_form }}
+						{{ ex_form.non_form_errors }}
+								{% for form in ex_form %}
+								<div class="inline {{ ex_form.prefix }}">
+									<div class="row">
+								  <div class="col-sm-3 mb-3 mb-sm-0">
+									{{ form.id_exercises|as_crispy_field }}
+								  </div>
+								  <div class="col-sm-2 mb-3 mb-sm-0">
+									{{ form.sets|as_crispy_field }}
+								  </div>
+									<div class="col-sm-2 mb-3 mb-sm-0">
+									{{ form.times|as_crispy_field }}
+								  </div>
+									<div class="col-sm-3 mb-3 mb-sm-0">
+										{{form.color|as_crispy_field}}
+								  </div>
+									<div class="col-sm-2 mb-3 mb-sm-0">
+									{{ form.negative|as_crispy_field }}
+								  </div>
+								</div>
+								</div>
+						{% endfor %}
+					</fieldset>
+							<br>
+			<div class="row">
+				<div class="col-md-1">
+						<input type="submit" class="btn btn-primary bordered" value="Αποθήκευση" />
+				</div>
+			</div>
+			</form>
+					</div>
+                </div>
+            </div>
+        </div>
+<script src="{% static 'js/jquery.formset.js' %}"></script>
+<script type="text/javascript">
+	// function select(id){
+	// 	console.log('load')
+	// 	document.getElementById(id).selectedIndex=-1
+    //     $("#"+id).multiselect({
+    //       maxHeight: 300,
+    //       enableCollapsibleOptGroups: true,
+    //       enableClickableOptGroups: true,
+    //       enableFiltering: true,
+    //       enableCaseInsensitiveFiltering: true,
+    //       filterBehavior: 'text',
+    //       nonSelectedText: 'Καμία επιλογή',
+    //       buttonWidth: '150px',
+    //       nSelectedText: 'Επιλογές',
+    //       allSelectedText: 'Όλες οι Επιλογές',
+    //       // numberDisplayed: 1
+    //     });
+    // }
+	// $( document ).ready(function() {
+    // 	var t = $("#"+"id_form-TOTAL_FORMS").val();
+    // 	for (i=0;i<t;i++){
+    // 		document.getElementById("id_form-"+i+"-id_exercises").selectedIndex=-1
+	// 		$("#"+"id_form-"+i+"-id_exercises").multiselect({
+	// 		  maxHeight: 300,
+	// 		  enableCollapsibleOptGroups: true,
+	// 		  enableClickableOptGroups: true,
+	// 		  enableFiltering: true,
+	// 		  enableCaseInsensitiveFiltering: true,
+	// 		  filterBehavior: 'text',
+	// 		  nonSelectedText: 'Καμία επιλογή',
+	// 		  buttonWidth: '150px',
+	// 		  nSelectedText: 'Επιλογές',
+	// 		  allSelectedText: 'Όλες οι Επιλογές',
+	// 		  // numberDisplayed: 1
+	// 		});
+	// 	}
+	// });
+	$(function() {
+			$(".inline.{{ ex_form.prefix }}").formset({
+					prefix: "{{ ex_form.prefix }}", // The form prefix for your django formset
+					addCssClass: "btn btn-block btn-success bordered inline-form-add", // CSS class applied to the add link
+					deleteCssClass: "btn btn-block btn-danger bordered", // CSS class applied to the delete link
+					addText: 'Προσθήκη Άσκησης', // Text for the add link
+					deleteText: 'Αφαίρεση Άσκησης', // Text for the delete link
+					formCssClass: 'inline-form' // CSS class applied to each form in a formset
+			})
+	});
+</script>
+{% endblock %}

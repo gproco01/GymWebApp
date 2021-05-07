@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns = "http://www.w3.org/1999/html">
+{% load static %}
+
+<head>
+    <meta charset="utf-8">
+    <title>MS Fit Care Gym</title>
+    <link rel="shortcut icon" href="{% static 'img/logo.jpg' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MS Fit Care Gym</title>
+    <link rel="shortcut icon" href="{% static 'img/logo.jpg' %}" />
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+    <script src="{% static 'js/jquery.min.js'  %}"></script>
+
+
+    {% block title %}
+    {% endblock%}
+</head>
+
+<body {% block bg %} {% endblock %}>
+<!--    <h1 class="text-center d-none d-lg-block site-heading " style="color: #5a9e41;"><span class="site-heading-upper mb-3" style="font-size: 50px; font-family: Lucida Console;">MS Fit Care Gym&nbsp;</span></h1>-->
+<!--    <h1 class="text-center text-white d-none d-lg-block site-heading" ><span class="text-primary site-heading-upper mb-3">MS Fit Care Gym&nbsp;</span></h1>-->
+<!--    <a class="navbar-brand" href="#">-->
+<!--            <img src= "{% static 'img/logo1.jpg' %}" width="50" height="50" alt="">-->
+<!--        </a>-->
+    <header class="fixed-top">
+<!--        <div style="background-color: black;text-align: center"><img src="{% static 'img/logo4.jpg'%}"></div>-->
+    <nav class="navbar navbar-light navbar-expand-lg bg-dark  py-lg-2" id="mainNav">
+        <a class="navbar-brand d-none d-lg-block" {%if user.is_authenticated and request.user.groups.all.0.name != 'admin' %} href="{% url 'msfitcaregym:dashboard' %}" {%else%} href="{% url 'msfitcaregym:home' %}" {%endif%}> MS Fit Care Gym&nbsp;</a>
+        <div class="container"><a class="navbar-brand d-lg-none text-expanded" {%if user.is_authenticated and request.user.groups.all.0.name != 'admin' %} href="{% url 'msfitcaregym:dashboard' %}" {%else%} href="{% url 'msfitcaregym:home' %}" {%endif%}>MS Fit Care Gym</a><button data-toggle="collapse" data-target="#navbarResponsive" class="navbar-toggler" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="nav navbar-nav mx-auto">
+                    {%if user.is_authenticated and request.user.groups.all.0.name != 'admin' %}
+                    <li class="nav-item {%if tab == 'dash' %} active {%endif%}" role="presentation"><a class="nav-link" href="{%url 'msfitcaregym:dashboard'%}">Dashboard</a></li>
+                    <li class="nav-item dropdown no-arrow {%if tab == 'gym' %} active {%endif%}" role="presentation">
+                        <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"><span >Κρατησεις</span></a>
+                        <div class="dropdown-menu dropdown-menu-right dropdown-list dropdown-menu-right animated--grow-in" role="menu">
+                            <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:userReservations'%}"><i class="fas fa-calendar fa-sm fa-fw mr-2 text-gray-400"></i>Ιστορικό Κρατήσεων</a>
+                        {% for type in types %}
+                            <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:userGymCalendar' type.pk %}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;{{type.Title}}</a>
+                        {% endfor %}
+                            <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:userPhysioCalendar'%}"><i class="fas fa-calendar fa-sm fa-fw mr-2 text-gray-400"></i>Φυσιοθεραπεία</a>
+                        </div>
+                        </div>
+                    </li>
+                    <li class="nav-item {%if tab == 'myprogram' %} active {%endif%}" role="presentation"><a class="nav-link" href="{%url 'msfitcaregym:displayuserprogram'%}">Προγραμμα</a></li>
+                    {%else%}
+                    <li class="nav-item {%if tab == 'home' %} active {%endif%}" role="presentation"><a class="nav-link" href="{%url 'msfitcaregym:home'%}">Home</a></li>
+                    <li class="nav-item {%if tab == 'about_us' %} active {%endif%}" role="presentation"><a class="nav-link " href="{%url 'msfitcaregym:aboutus'%}">About us</a></li>
+                    <li class="nav-item {%if tab == 'pricing' %} active {%endif%}" role="presentation"><a class="nav-link" href="{%url 'msfitcaregym:pricing'%}">Pricing</a></li>
+                    <li class="nav-item {%if tab == 'galery' %} active {%endif%}" role="presentation"><a class="nav-link" href="{%url 'msfitcaregym:galery'%}">Facilities</a></li>
+                    <li class="nav-item {%if tab == 'working_hours' %} active {%endif%}" role="presentation"><a class="nav-link" href="{%url 'msfitcaregym:hours'%}">Info</a></li>
+                    {%endif%}
+                    {%if not user.is_authenticated %}
+                    <li class="nav-item {%if tab == 'register' %} active {%endif%}" role="presentation"><a class="nav-link" href="{%url 'msfitcaregym:register'%}">Register</a></li>
+                    {%endif%}
+                </ul>
+                {%if user.is_authenticated %}
+                <div class="d-flex flex-column" id="content-wrapper">
+                    <div id="content">
+                        <ul class="nav navbar-nav mx-auto">
+                            {%if request.user.groups.all.0.name == 'admin'%}
+                                <li class="nav-item dropdown no-arrow " role="presentation">
+                                    <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"><span>Γυμναστήριο</span></a>
+                                    <div class="dropdown-menu dropdown-menu-right dropdown-list dropdown-menu-right animated--grow-in" role="menu">
+                                    <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:addSlotsCalendar'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Ώρες Κρατήσεων</a>
+                                    <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:daysClosed'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>Αργίες</a>
+                                    <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:allexercises'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>Ασκήσεις</a>
+                                    <hr>
+                                    {% for type in types %}
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:adminGymCalendar' type.pk %}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;{{type.Title}}</a>
+                                    {% endfor %}
+                                    </div>
+                                    </div>
+                                </li>
+                                <li class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"><span>Φυσιοθεραπεία</span></a>
+                                <div class="dropdown-menu dropdown-menu-right dropdown-list dropdown-menu-right animated--grow-in" role="menu">
+                                <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:adminPhysioCalendar'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Ραντεβού</a>
+                                </div>
+                                </li>
+                                <li class="nav-item dropdown no-arrow " role="presentation">
+                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#">{%ifnotequal req_total 0%}<span id="req" class="badge badge-danger badge-counter">{{req_total}} </span>{%else%} {%endifnotequal%}<i class="fas fa-bell fa-fw"></i></a>
+                                    <div class="dropdown-menu dropdown-menu-right dropdown-list dropdown-menu-right animated--grow-in"
+                                        role="menu">
+                                        <h6 class="dropdown-header">Αιτήματα Χρηστών</h6>
+                                        <a class="d-flex align-items-center dropdown-item" href="{%url 'msfitcaregym:usersinfo'%}" >
+                                            <div><span class="small text-gray-500" >Εκκρεμούν {{req_total}} αιτήματα χρηστών</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                </li>
+                            {%else%}
+                            <li class="nav-item dropdown no-arrow " role="presentation">
+                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#" onclick="checkann()">{%ifnotequal total 0%}<span id="ann" class="badge badge-danger badge-counter">{{total}} </span>{%else%} {%endifnotequal%}<i class="fas fa-bell fa-fw"></i></a>
+                                    <div class="dropdown-menu dropdown-menu-right dropdown-list dropdown-menu-right animated--grow-in"
+                                        role="menu">
+                                        <h6 class="dropdown-header">Νέες Ανακοινώσεις</h6>
+                                        {% for a in msgs %}
+                                        <a class="d-flex align-items-center dropdown-item" data-toggle="modal" data-target="#exModal" onclick="getvalue1('{{a.title}}','{{a.details}}','{{a.submited_date}}')">
+                                            <div><span class="small text-gray-500">{{a.title}}</span>
+                                            </div>
+                                        </a>
+                                        {%endfor%}
+                                       <a class="text-center dropdown-item small text-gray-500" href="{%url 'msfitcaregym:announcements'%}">Όλες οι Ανακοινώσεις</a></div>
+                                </div>
+                            </li>
+                            {%endif%}
+                            <li class="nav-item dropdown no-arrow" role="presentation">
+                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#">{%if request.user.groups.all.0.name == 'admin'%}<span>User</span>{%else%} <span class=" d-lg-inline mr-2 text-gray-600 small">{{user.get_full_name}}</span>{%endif%}</a>
+                                    {%if request.user.groups.all.0.name == 'admin'%}
+                                    <div class="dropdown-menu shadow dropdown-menu-right animated--grow-in" role="menu">
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:userprogram'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Δημιουργία Προγράμματος</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:editprogramuser'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Επεξεργασία Προγράμματος</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:addpayments'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>Προσθήκη Συνδρομής</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:allpayments'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>Όλες οι Συνδρομές</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:usersinfo'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>Πληροφορίες Χρηστών</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:announcements'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>Ανακοινώσεις</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:change_password'%}"><i class="fas fa-key fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Αλλαγή Συνθηματικού</a>
+                                        <a class="dropdown-item" role="presentation" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Έξοδος</a>
+                                    </div>
+                                    {%else%}
+                                    <div class="dropdown-menu shadow dropdown-menu-right animated--grow-in" role="menu">
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:profile'%}"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Προφίλ</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:change_password'%}"><i class="fas fa-key fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Αλλαγή Κωδικού</a>
+                                        <a class="dropdown-item" role="presentation" href="{%url 'msfitcaregym:paymentsuser'%}"><i class="far fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Συνδρομή</a>
+                                        <a class="dropdown-item" role="presentation" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>&nbsp;Έξοδος</a>
+                                    </div>
+                                    {%endif%}
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                {%else%}
+                <a class="nav-item" href="{% url 'login' %}" style="color: darkgrey !important;">
+                Login
+                </a>
+                {%endif%}
+            </div>
+        </div>
+    </nav>
+    </header>
+    <main role="main" class="container">
+        <br>
+    {% block body_block %}
+    {% endblock %}
+    </main>
+    <!-- Modal -->
+    <div class="modal fade" id="exModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exModalLabel"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="mbody">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+<footer class="fixed-bottom">
+    <div style="background-color: black;text-align: center">
+    <img src="{% static 'img/gym_logo.jpg'%}" style="height: 50px">
+    </div>
+</footer>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js'  %}"></script>
+    <script src="{% static 'js/current-day.js'  %}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/buttons.flash.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/buttons.print.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
+<script>
+    function getvalue1(title,details,date){
+        console.log('function');
+        var x = document.getElementById('exModalLabel')
+        x.innerText = title;
+        var y = document.getElementById('mbody')
+        y.innerHTML = details;
+        }
+    function checkann(){
+        $.ajax({
+            type:'POST',
+            url:"{%url 'msfitcaregym:checkannouncement'%}",
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+        })
+
+    }
+</script>
+</body>
+    {% block footer%}
+    {% endblock %}

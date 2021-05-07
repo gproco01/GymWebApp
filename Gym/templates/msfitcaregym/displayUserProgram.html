@@ -1,0 +1,122 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+{% load crispy_forms_tags %}
+
+{% block title %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{%static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+    <script type="text/javascript" src="https://github.com/niklasvh/html2canvas/releases/download/0.5.0-alpha1/html2canvas.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+    <link rel="stylesheet" href="https://printjs-4de6.kxcdn.com/print.min.css">
+
+
+</head>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+    <section class="page-section" >
+        <div class="container "><img class="img-fluid rounded about-heading-img mb-3 mb-lg-0" >
+            <div class="about-heading-content" id="program">
+                <div class="card shadow" id="program1">
+                        <div class="card-header py-3 text-center">
+                            <h3 class="text-primary m-0 font-weight-bold" style="font-family:Lucida Console;">MS FIT CARE GYM</h3>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong>Όνομα:{{user.first_name}} {{user.last_name}}</strong></div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong>Ημερομηνία:{{program.date}}</strong></div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong>Στόχος:{{program.goal}}</strong></div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong style="color: red">**Ασκήσεις με το ίδιο χρώμα(εκτός μαύρο) εκτελούνται ως superset</strong></div>
+                        </div>
+                        <div class="card-body" >
+                            <div class="row">
+                                {% if program_days%}
+                                    {% for d in program_days%}
+                                            <div class="table-responsive col-md-6">
+                                                <table class="card-table table">
+                                                    <thead class="thead-dark">
+                                                        <tr>
+                                                          <th scope="col"><a href='/displayDay/{{d.pk}}/'>{{d.title}}</a></th>
+                                                          <th scope="col">Σετ</th>
+                                                          <th scope="col">Επαναλήψεις</th>
+                                                        </tr>
+                                                      </thead>
+                                                    <tbody>
+                                                        {% for e in d.exercises %}
+                                                        <tr style="color: #{{e.color}}">
+                                                          <td>{{e.id_exercises_id}} {%if e.negative%}(Αρνητικές Επαναλήψεις){%endif%}</td>
+                                                          <td>{{e.sets}}</td>
+                                                          <td>{{e.times}}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                      </tbody>
+                                                </table>
+                                            </div>
+                                    {% endfor %}
+                                {%else%}
+                                    <p>Το προγραμμα δεν έχει καταχωρηθεί</p>
+                                {%endif%}
+                                </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div id="elementH"></div>
+<!--        <button class=" btn btn-primary" type="button" onclick="printJS({-->
+<!--                                            printable: 'program1',-->
+<!--                                            type: 'html',-->
+<!--                                            targetStyles: ['*'],-->
+<!--                                            style:'table { width:50%;} th,td{ padding: 5px; border: 1px solid black; border-collapse: collapse; }'-->
+<!--                                         })">-->
+<!--                                        Εκτύπωση-->
+<!--                                </button>-->
+        <button id="export1" type="button" class="btn btn-success" onclick="printDiv('program')">Εκτύπωση</button>
+        <a type="button" class="btn btn-primary" href="/displayprogramhistory/">Ιστορικό</a>
+    </section>
+<script>
+
+    function printPDF() {
+    var doc = new jsPDF();
+    var elementHTML = $('#program1').html();
+    var specialElementHandlers = {
+        '#elementH': function (element, renderer) {
+            return true;
+        }
+    };
+    doc.fromHTML(elementHTML, 10, 10, {
+        'width': 170,
+        'elementHandlers': specialElementHandlers
+    });
+    doc.setLanguage("el-CY")
+
+    // Save the PDF
+    doc.save('sample-document.pdf');
+    }
+
+    function printDiv(divName) {
+     var printContents = document.getElementById(divName).innerHTML;
+     var originalContents = document.body.innerHTML;
+
+     document.body.innerHTML = printContents;
+
+     window.print();
+
+     document.body.innerHTML = originalContents;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+<!--    <link rel="stylesheet" href="{% static 'fonts1/fontawesome-all.min.css' %}">-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(0, 0, 0, 1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+                    <div class="cta-inner text-center rounded">
+                        <div class="text-center">
+                             <h4 class="text-dark mb-4">ΣΤΟΙΧΕΙΑ ΚΑΙ ΔΕΛΤΙΟ ΦΥΣΙΚΗΣ ΚΑΤΑΣΤΑΣΗΣ ΠΕΛΑΤΩΝ</h4>
+                            </div>
+                        <form class="user" method="post" id="rform">
+                            {%csrf_token%}
+                            {{registration_form.user}}
+                            <div class="row">
+                              <div class="col-sm-6 mb-3 mb-sm-0">
+                                {{ registration_form.job|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-6 mb-3 mb-sm-0">
+                                {{ registration_form.Address|as_crispy_field }}
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.birthday|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.height|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.weight|as_crispy_field }}
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-6 mb-3 mb-sm-0">
+                                {{ registration_form.phone|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-6 mb-3 mb-sm-0">
+                                {{ registration_form.first_time_gym|as_crispy_field }}
+                              </div>
+                            </div>
+                            <div class="text-left">
+                                <h5 class="text-dark mb-4">ΙΣΤΟΡΙΚΟ ΥΓΕΙΑΣ</h5>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-12 mb-3 mb-sm-0">
+                                {{ registration_form.heart_problems|as_crispy_field }}
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.medicines|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.surgery|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.epilepsy|as_crispy_field }}
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.headache|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.myosceletical_problems|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-4 mb-3 mb-sm-0">
+                                {{ registration_form.other_problems|as_crispy_field }}
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-3 mb-3 mb-sm-0">
+                                {{ registration_form.smoking|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-3 mb-3 mb-sm-0">
+                                {{ registration_form.normal_blood_test|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-3 mb-3 mb-sm-0">
+                                {{ registration_form.stable_weight|as_crispy_field }}
+                              </div>
+                              <div class="col-sm-3 mb-3 mb-sm-0">
+                                {{ registration_form.cardiac_test|as_crispy_field }}
+                              </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 mb-3 mb-sm-0">
+                                {{ registration_form.approve|as_crispy_field }}
+                              </div>
+                            </div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <p class="{{ message.tags }}" style="color: red;">
+                                    {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                                    </p>
+                                {% endfor %}
+                            {% endif %}
+                            <button class="btn btn-primary text-white btn-user" type="submit">Καταχώρηση</button>
+                            <hr>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+<script>
+    $( document ).ready(function() {
+    $("#id_height").attr("required", true);
+    $("#id_weight").attr("required", true);
+    $("#id_age").attr("required", true);
+    $("#id_phone").attr("required", true);
+    });
+
+
+</script>
+{% endblock %}

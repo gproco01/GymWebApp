@@ -1,0 +1,248 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block title %}
+    <title>Days Closed</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+
+<style>
+    table {
+    table-layout:fixed;
+    }
+    td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    }
+    @media only screen and (max-width: 480px) {
+    /* horizontal scrollbar for tables if mobile screen */
+    .tablemobile {
+        overflow-x: auto;
+        display: block;
+    }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section rounded" style="background-color: hsla(0,0%,100%,.95);">
+    <div class="card-header py-3">
+        <p class="text-primary m-0 font-weight-bold">Αργίες</p>
+    </div>
+    <br>
+        <div class="container">
+            <div class="row" >
+                <div class="col">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item border rounded">
+                            <a class="nav-link border rounded shadow-none active" href="#repeating" role="tab" data-toggle="tab" id="1">Σταθερές</a>
+                        </li>
+                        <li class="nav-item border rounded">
+                            <a class="nav-link border rounded shadow-none" href="#daysClosed" role="tab" data-toggle="tab" id="2">Μετακινούμενες</a>
+                        </li>
+                        <li class="nav-item border rounded">
+                            <a class="nav-link border rounded shadow-none"  href="" onclick="showModal('modal')" role="tab" data-toggle="tab" id="3">Προσθήκη νέας αργίας</a>
+                        </li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="repeating">
+                            <table id="repeatingTable" class="table table-striped row-border tablemobile">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Ημερομηνία</th>
+                                    <th scope="col">Από</th>
+                                    <th scope="col">Μέχρι</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for day in repeatingDaysClosed %}
+                                    <tr>
+                                        <td>{{day.day}}/{{day.month}}</td>
+                                        <td>{{day.valid_from}}</td>
+                                        <td>{{day.valid_to}}</td>
+                                        <td><a href="{%url 'msfitcaregym:removeDayClosed' 1 day.pk%}">Κατάργηση</a></td>
+                                    </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="tab-pane fade" id="daysClosed">
+                            <table id="daysClosedTable" class="table table-striped row-border tablemobile">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Ημερομηνία</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for day in daysClosed%}
+                                    <tr>
+                                        <td>{{day.date}}</td>
+                                        <td><a href="{%url 'msfitcaregym:removeDayClosed' 0 day.pk%}">Κατάργηση</a></td>
+                                    </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<!-- The Modal -->
+<div id="modal" class="modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h4 class="modal-title">Προσθήκη Αργίας:</h4>
+              <span class="close">&times;</span>
+          </div>
+            <div class="modal-body" id="addDay" >
+                <form action="/addDayClosed/" class="uniForm blueForms" method="post" id="departure_form">
+                    {% csrf_token %}
+                    <label for="date">Ημερομηνία:</label>
+                    <input type="date" id="date" name="date" value="">
+                    <label for="isRepeating">Επαναλαμβάνεται?</label>
+                    <input type="radio" name="isRepeating" id="isRepeating">
+
+            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Κλείσιμο</button>
+              <button type="submit" class="btn btn-primary">Καταχώρηση</button>
+              </form>
+          </div>
+        </div>
+      </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<script>
+$(document).ready(function () {
+    $('#daysClosedTable').DataTable({
+        "language": {
+        "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+        "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+        "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+        "search": "Αναζήτηση",
+        "paginate": {
+            "first":      "Πρώτη",
+            "last":       "Τελευταία",
+            "next":       "Επόμενη",
+            "previous":   "Προηγούμενη"
+        },
+        "infoEmpty": "Καμία Εγγραφή",
+        "infoFiltered": "(filtered from _MAX_ total records)"
+     },
+
+    });
+
+
+    $('#repeatingTable').DataTable({
+        "language": {
+        "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+        "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+        "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+        "search": "Αναζήτηση",
+        "paginate": {
+            "first":      "Πρώτη",
+            "last":       "Τελευταία",
+            "next":       "Επόμενη",
+            "previous":   "Προηγούμενη"
+        },
+        "infoEmpty": "Καμία Εγγραφή",
+        "infoFiltered": "(filtered from _MAX_ total records)"
+     },
+    }
+    );
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables({ visible: true, api: true })).DataTable()
+           .columns.adjust()
+    });
+});
+</script>
+<script>
+    function showModal(name) {
+        var x = document.getElementById(name);
+        x.style.display = "block";
+    }
+</script>
+
+<script>
+    var modal = document.getElementById("modal");
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+    var close = document.getElementsByClassName("btn btn-default")[0];
+    // When the user clicks close, close the modal
+    close.onclick = function() {
+      modal.style.display = "none";
+    }
+
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+</script>
+
+<style>
+    /* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 100; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+    /* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+
+{% endblock %}

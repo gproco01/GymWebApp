@@ -1,0 +1,133 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block title %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+
+<style>
+    table {
+    table-layout:fixed;
+    }
+    td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    }
+    @media only screen and (max-width: 480px) {
+    /* horizontal scrollbar for tables if mobile screen */
+    .tablemobile {
+        overflow-x: auto;
+        display: block;
+    }
+    }
+    </style>
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(256,256,256,0.9);">
+        <div class="container">
+            <div class="row" >
+                <div class="col">
+                    <button data-toggle="modal" data-target="#exampleModal" class="btn btn-success">Προσθήκη Άσκησης</button>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="allusers">
+                            <table id="exampleInTab" class="table table-striped row-border tablemobile">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Άσκηση</th>
+                                    <th scope="col">Κατηγορία</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for e in exercises%}
+                                    <tr>
+                                        <td>{{e.name}}</td>
+                                        <td>{{e.category}}</td>
+                                        <td><a class="btn btn-danger" onclick="deleteSlot('{{e.pk}}')" >Αφαίρεση</a> </td>
+                                    </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Προσθήκη Άσκησης</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+           <form enctype="multipart/form-data" class="user" method="post" >
+              {%csrf_token%}
+              <div class="modal-body" id="modalbody">
+                {{form.as_p}}
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
+                  <input type="submit" class="btn btn-primary" style="background-color: #e6a756!important;" value="Αποθήκευση">
+              </div>
+           </form>
+        </div>
+      </div>
+</div>
+<script>
+$(document).ready(function () {
+
+  var table =  $('#exampleInTab').DataTable({
+        "language": {
+                "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+                "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+                "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+                "search": "Αναζήτηση",
+                "paginate": {
+                    "first":      "Πρώτη",
+                    "last":       "Τελευταία",
+                    "next":       "Επόμενη",
+                    "previous":   "Προηγούμενη"
+                },
+                "infoEmpty": "Καμία Εγγραφή",
+                "infoFiltered": "(filtered from _MAX_ total records)"
+             },
+        dom: 'B<"clear">lfrtip',
+                 buttons:{
+                     name:'primary',
+                     buttons: [
+
+                         { extend: 'copy', text: 'Αντιγραφή' },
+                         { extend: 'pdf', text: 'PDF' },
+                         { extend: 'excel', text: 'Excel' },
+                         { extend: 'print', text: 'Εκτύπωση' },
+
+                         // 'copy','pdf','excel'
+                     ]
+                 },
+             color : 'black',
+             opacity: 0.8
+            }
+    );
+});
+
+function deleteSlot(pk){
+        console.log(pk)
+        if (confirm("Είστε σίγουροι ότι θέλετε να το διαγράψετε;")) {
+            var url = "{% url 'msfitcaregym:removeexercise' 123 %}"
+            document.location.href = url.replace('123', pk);
+        }
+    }
+</script>
+{% endblock %}
