@@ -1,0 +1,95 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+{% load crispy_forms_tags %}
+
+{% block title %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{%static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+</head>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+    <section class="page-section">
+        <div class="container "><img class="img-fluid rounded about-heading-img mb-3 mb-lg-0" >
+            <div class="about-heading-content">
+                <div class="container-fluid">
+                <div class="d-sm-flex justify-content-between align-items-center mb-4">
+                    <h3 class="text-dark mb-0" style="color: #e6a756!important;">Καλωσόρισες {{request.user.first_name}}</h3></div>
+                <div class="row">
+                    <div class="col-md-6 col-xl-3 mb-4">
+                        <div class="card shadow border-left-primary py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center no-gutters">
+                                    <div class="col mr-2">
+                                        <div class="text-uppercase text-primary font-weight-bold text-xs mb-1"><span>Επομενη Κρατηση</span></div>
+                                        <div class="text-dark font-weight-bold h5 mb-0">{%if next.date %}<span>{{next.type.Title}}: {{next.date}} {{next.time.start_time|time:"H:i"}}-{{next.time.end_time|time:"H:i"}}</span>{%else%}<span>{{next}}</span>{%endif%}</div>
+                                    </div>
+                                    <div class="col-auto"><i class="fas fa-calendar fa-2x text-gray-300"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3 mb-4">
+                        <div class="card shadow border-left-info py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center no-gutters">
+                                    <div class="col mr-2">
+                                        <div class="text-uppercase text-info font-weight-bold text-xs mb-1"><span>Κρατησεις</span></div>
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col-auto">
+                                                <div class="text-dark font-weight-bold h5 mb-0 mr-3">
+                                                    {% for r in reservations %}
+                                                    <span>{{r.type.Title}}: {{r.date}} {{r.time.start_time|time:"H:i"}}-{{r.time.end_time|time:"H:i"}}</span><br>
+                                                    {%endfor%}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto"><i class="fas fa-clipboard-list fa-2x text-gray-300"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3 mb-4">
+                        <div class="card shadow border-left-success py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center no-gutters">
+                                    <div class="col mr-2">
+                                        <div class="text-uppercase text-success font-weight-bold text-xs mb-1">{% if payment and not over %}<span>Ληξη Συνδρομης</span>{%elif payment and over %}<span style="color: red;!important;">Η Συνδρομη σας εχει ληξει</span> {%else%}<span>Δεν υπαρχει καταχωρημενη συνδρομη</span>{%endif%}</div>
+                                        <div class="text-dark font-weight-bold h5 mb-0">{% if payment %}<span>{{payment.pay_until}}</span>{%endif%}</div>
+                                    </div>
+                                    <div class="col-auto"><i class="far fa-file-alt fa-2x text-gray-300"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {%if physio%}
+                    <div class="col-md-6 col-xl-3 mb-4">
+                        <div class="card shadow border-left-warning py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center no-gutters">
+                                    <div class="col mr-2">
+                                        <div class="text-uppercase text-warning font-weight-bold text-xs mb-1"><span>Φυσιοθεραπεια</span></div>
+                                        <div class="text-dark font-weight-bold h5 mb-0"><span>{{physio.date}} {{physio.start_time|time:"H:i"}}-{{physio.end_time|time:"H:i"}}</span></div>
+                                    </div>
+                                    <div class="col-auto"><i class="fas fa-calendar fa-2x text-gray-300"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {%endif%}
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+
+{% block title %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=yes">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+<!--    <link rel="stylesheet" href="{% static 'fonts1/fontawesome-all.min.css' %}">-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <link rel="stylesheet" href="{% static 'fullcalendar/main.css'%}">
+    <script src="{% static 'fullcalendar/main.js'%}"></script>
+    <script src="{% static 'fullcalendar/locales/el.js' %}"></script>
+
+{% endblock %}
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+{% block body_block %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            var type = document.getElementById("type")
+            var valid_from = document.getElementById("valid_from")
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                // touchSelect:true,
+                contentHeight: 'auto',
+                editable: true,
+                eventOverlap: false,
+                selectable: true,
+                slotEventOverlap: false,
+                initialView: 'timeGridWeek',
+                scrollTime: '06:00:00',
+                slotMinTime:'06:00:00',
+                slotMaxTime:'22:00:00',
+                slotDuration:'00:15:00',
+                allDaySlot: false,
+                headerToolbar: {
+                    left:"",
+                    right: 'addEventButton',
+                    center:""
+                },
+                customButtons: {
+                    addEventButton: {
+                      text: 'Καταχώρηση',
+                      click: function() {
+                          ans = confirm("Καταχώρηση Νέου Προγράμματος?\nΑν υπάρχουν ήδη καταχωρημένες κρατήσεις θα διαγραφούν!!!")
+                          if (ans === true) {
+                              events=calendar.getEvents()
+                              var finish=[]
+                              for (i in events){
+                                  t={
+                                      date: moment(events[i].start).format("Y-MM-DD"),
+                                      start_time: moment(events[i].start).format("HH:mm") ,
+                                      end_time: moment(events[i].end).format("HH:mm")
+                                  }
+                                  finish.push(t)
+                              }
+                              console.log(finish)
+                              $.ajax({
+                                    type: "POST",
+                                    url: "{%url 'msfitcaregym:addSlots' %}",
+                                    data: {
+                                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                                        events: JSON.stringify(finish),
+                                        type: type.value,
+                                        valid_from: valid_from.value
+                                    },
+                                    dataType: "json",
+                                    success: function (data) {
+                                        alert('Το πρόγραμμα καταχωρήθηκε');
+                                        // location.href="{%url 'msfitcaregym:home' %}"
+                                    },
+                                    failure: function (data) {
+                                        alert('Παρουσιάστηκε Σφάλμα!!!');
+                                    }
+                              });
+
+                          }
+
+                      }
+                    }
+                  },
+                dayHeaderFormat:{
+                  weekday: 'long'
+                },
+                dayMaxEventRows: true,
+                views: {
+                    timeGrid: {
+                      dayMaxEventRows: true // adjust to 6 only for timeGridWeek/timeGridDay
+                    }
+                },
+                select: function (info){
+                    console.log(info.start,info.startStr)
+                    calendar.addEvent({
+                        // title: 'dynamic event',
+                        start: info.start,
+                        end: info.end
+                    });
+                },
+                eventResize: function (info) {
+                },
+                eventDrop: function (info) {
+
+                },
+                eventClick: function (info) {
+                    ans = confirm("Διαγραφή επιλογής?")
+                    if (ans === true) {
+                        info.event.remove()
+                    }
+                },
+        });
+            calendar.render();
+            calendar.setOption('locale', 'el');
+        });
+
+</script>
+<section class="page-section rounded" style="background-color: hsla(0,0%,100%,.95);">
+    <div class="card shadow">
+    <div class="card-header py-3">
+        <p class="text-primary m-0 font-weight-bold">Νέο Πρόγραμμα</p>
+    </div>
+    <br>
+    <div class="card-body">
+        <div class="row">
+            <label for="valid_from">Ημερομηνιά Έναρξης:</label>
+            <input type="date" placeholder="yyyy-mm-dd" name="valid_from" id="valid_from" onchange="changeValidTo()" required>
+        </div>
+        <div class="row">
+            <label for="valid_from">Ημερομηνία Λήξης:</label>
+            <input type="date" placeholder="yyyy-mm-dd" name="valid_to" id="valid_to" required>
+        </div>
+        <div class="row">
+            <label for="type">Για:</label>
+            <select name="type" id="type">
+                {% for i in types %}
+                    <option value='{{i.id_type}}'>{{i.Title}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div id='calendar'></div>
+    </div>
+</section>
+
+
+
+{% endblock %}
+{% block footer %}
+<script>
+    function getCurrentDate(days=0){
+        var today = new Date();
+        var date = today.getFullYear()+'-'+("0"+(today.getMonth()+1)).slice(-2)+'-'+("0"+(today.getDate()+days)).slice(-2);
+        // var time = ("0"+today.getHours()).slice(-2) + ":" + ("0"+today.getMinutes()).slice(-2);
+        // var dateTime = date+'T'+time;
+        return date
+    }
+    function changeValidTo(){
+        document.getElementById("valid_to").min = document.getElementById("valid_from").value;
+    }
+
+    $(document).ready(function () {
+        document.getElementById("valid_from").min = getCurrentDate();
+        document.getElementById("valid_from").value = getCurrentDate(5);
+        changeValidTo();
+    })
+</script>
+
+
+{% endblock %}

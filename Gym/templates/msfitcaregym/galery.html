@@ -1,0 +1,140 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static %}
+
+{% block title %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Galery</title>
+    <link rel="stylesheet" href="{%static 'bootstrap/css/bootstrapg.min.css' %}">
+    <link rel="stylesheet" href="{%static 'fonts1/ionicons.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,400,700">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.6.1/css/pikaday.min.css">
+</head>
+{%endblock%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+        <section class="portfolio-block projects-cards">
+            <div class="container">
+<!--                <div class="heading">-->
+<!--                    <h2 style="color: #e6a756!important;">Gallery</h2>-->
+<!--                </div>-->
+                <div class="row">
+                    {% for g in gallery %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card border-0"><a><img class="card-img-top scale-on-hover" src="{{g.photo.url}}" alt="Card Image"></a>
+                            <div class="card-body">
+                                <h6><a >{%if g.title%}{{g.title}}{%endif%}</a></h6>
+                                <p class="text-muted card-text">{{g.details}}</p>
+                                {%if request.user.groups.all.0.name == 'admin'%}
+                                {%if g.reservation %}
+                                <p class="text-muted card-text">
+                                    Μέγιστος Αριθμός Κρατήσεων: {{g.reservation.total_persons}}
+                                </p>
+                                {%endif%}
+                                {%endif%}
+                            </div>
+
+                            {%if request.user.groups.all.0.name == 'admin'%}
+                            {%if g.reservation %}
+                            <button data-toggle="modal" data-target="#exampleModal1" onclick="changeMax('{{g.reservation.id_type}}')" class="btn btn-success" >Change Max Reservations</button>
+                            {%endif%}
+                            <a class="btn btn-danger" onclick="deleteSlot('{{g.pk}}')" >Αφαίρεση</a>
+                            {%endif%}
+                        </div>
+                    </div>
+                    {%endfor%}
+                </div>
+            </div>
+        {%if request.user.groups.all.0.name == 'admin'%}
+            <button data-toggle="modal" data-target="#exampleModal" class="btn btn-success">Προσθήκη</button>
+        {%endif%}
+        </section>
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Προσθήκη</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+           <form enctype="multipart/form-data" class="user" method="post" >
+              {%csrf_token%}
+              <div class="modal-body" id="modalbody">
+                {{form.as_p}}
+                  <label for="add_reservations" name="reservation">Προσθήκη στις κρατήσεις?</label>
+                  <input type="checkbox" id="add_reservations" name="addReservation" onclick="reservations(this)">
+
+                    <div id="reservation_div" style="display: none">
+                        <label for="max_res">Μέγιστος Αριθμός Κρατήσεων:</label>
+                        <input type="number" id="max_res" name="max_res">
+                    </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
+                  <input type="submit" class="btn btn-primary" style="background-color: #e6a756!important;" value="Αποθήκευση">
+              </div>
+           </form>
+        </div>
+      </div>
+</div>
+
+<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel1">Προσθήκη</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+           <form enctype="multipart/form-data" class="user" method="post" >
+              {%csrf_token%}
+               <input type="hidden" name="type_id" id="type_id">
+              <div class="modal-body" id="modalbody1">
+                    <label for="max_res">Μέγιστος Αριθμός Κρατήσεων:</label>
+                    <input type="number" name="max_res">
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary" style="background-color: #e6a756!important;" value="Αποθήκευση">
+              </div>
+           </form>
+        </div>
+      </div>
+</div>
+    <script src="{%static 'js/jquery1.min.js' %}"></script>
+    <script src="{%static 'bootstrap/js/bootstrapg.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.6.1/pikaday.min.js"></script>
+    <script src="{%static 'js/themeg.js' %}"></script>
+<script>
+    function deleteSlot(pk){
+        console.log(pk)
+        if (confirm("Είστε σίγουροι ότι θέλετε να το διαγράψετε; ")) {
+            var url = "{% url 'msfitcaregym:removegallery' 123 %}"
+            document.location.href = url.replace('123', pk);
+        }
+    }
+</script>
+<script>
+    function reservations(cb){
+        var x = document.getElementById("reservation_div");
+        if (cb.checked){
+            x.style.display = "block";
+        }else{
+            x.style.display = "none";
+        }
+    }
+
+    function changeMax(id){
+        document.getElementById("type_id").value=id;
+    }
+</script>
+{%endblock%}

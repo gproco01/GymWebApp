@@ -1,0 +1,66 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block title %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+<!--    <link rel="stylesheet" href="{% static 'fonts1/fontawesome-all.min.css' %}">-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(0, 0, 0, 0.1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+                    <div class="cta-inner text-center rounded">
+                        {%if registered%}
+                            <h1>Ευχαριστούμε για την εγγραφή σας</h1>
+                            <h1>Για την ενεργοποίηση του λογαριασμού σας θα σας σταλεί email</h1>
+                        {%else%}
+                        <form class="user" method="post">
+                            {%csrf_token%}
+                            <div class="form-group row">
+                                <div class="col-sm-6 mb-3 mb-sm-0"><input class="form-control form-control-user" type="text" id="exampleFirstName" placeholder="Όνομα" name="{{user_form.first_name.name}}" {%if user_creation_form.first_name.value %} value="{{user_creation_form.first_name.value}}" {% endif %} required>
+                                {{user_form.first_name.errors}}
+                                </div>
+                                <div class="col-sm-6"><input class="form-control form-control-user" type="text" id="exampleLastName" placeholder="Επίθετο" name="{{user_form.last_name.name}}" {%if user_creation_form.last_name.value %} value="{{user_creation_form.last_name.value}}" {% endif %} required>
+                                {{user_form.last_name.errors}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+<!--                                <div class="col-sm-6 mb-3 mb-sm-0"><input class="form-control form-control-user" type="email" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Email Address" name="{{user_form.email.name}}" {%if user_creation_form.email.value %} value="{{user_creation_form.email.value}}" {% endif %} >-->
+<!--                                {{user_form.first_name.errors}}-->
+<!--                                </div>-->
+                                <div class="col-sm-6"><input class="form-control form-control-user" type="text" id="username" placeholder="Email" name="{{user_form.username.name}}" {%if user_creation_form.username.value %} value="{{user_creation_form.username.value}}" {% endif %} >
+                                {{user_form.username.errors}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6 mb-3 mb-sm-0"><input class="form-control form-control-user" type="password" id="examplePasswordInput" placeholder="Κωδικός" name="{{user_form.password1.name}}">
+                                {{user_form.password1.errors}}
+                                </div>
+
+                                <div class="col-sm-6"><input class="form-control form-control-user" type="password" id="exampleRepeatPasswordInput" placeholder="Επανάληψη Κωδικού" name="{{user_form.password2.name}}">
+                                {{user_form.password2.errors}}
+                                </div>
+                            </div>
+                            <button class="btn btn-primary text-white btn-user" type="submit">Δημιουργία Λογαριασμού</button>
+                        </form>
+                        <div class="text-center"><a class="small" href="{%url 'msfitcaregym:password_reset'%}">Ξεχάσατε τον κωδικό σας;</a></div>
+                        <div class="text-center"><a class="small" href="{%url 'msfitcaregym:login'%}">Έχετε ήδη λογαριασμό; Είσοδος!</a></div>
+                        {%endif%}
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+{% endblock %}

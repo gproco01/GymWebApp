@@ -1,0 +1,120 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block title %}
+    <title>User's Payments</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+
+<style>
+    table {
+    table-layout:fixed;
+    }
+    td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    }
+    @media only screen and (max-width: 480px) {
+    /* horizontal scrollbar for tables if mobile screen */
+    .tablemobile {
+        overflow-x: auto;
+        display: block;
+    }
+    }
+    </style>
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(256,256,256,0.9);">
+        <div class="container">
+            <div class="row" >
+                <div class="col">
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="allusers">
+                            <table id="exampleInTab" class="table table-striped row-border tablemobile">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Όνομα</th>
+                                    <th scope="col">Πληρωμή Από</th>
+                                    <th scope="col">Πληρωμή Μέχρι</th>
+                                    <th scope="col">Πακέτο Πληρωμής</th>
+                                    <th scope="col">Τιμή</th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in users%}
+                                    {%if u.payment %}
+                                    <tr>
+                                        <td><a href='/editpayment/{{u.payment.pk}}/'>{{u.user.first_name}} {{u.user.last_name}}</a></td>
+                                        <td>{{u.payment.pay_from}}</td>
+                                        {% if u.over %}
+                                        <td style="color: black;background-color: red">{{u.payment.pay_until}}</td>
+                                        {%else%}
+                                        <td style="color: black;background-color: #1c7430">{{u.payment.pay_until}}</td>
+                                        {%endif%}
+                                        <td>{{u.payment.package}}</td>
+                                        <td>{{u.payment.price}}</td>
+                                        <td><a class="btn btn-primary" href="/userpayments/{{u.pk}}/">Συνδρομές</a> </td>
+                                        <td>{% if u.accountStatus == 'Accepted' %}<a class="btn btn-danger" href="{% url 'msfitcaregym:blockuser' u.id False%}">Μη Ενεργός</a>
+                                        {%else%} <a class="btn btn-success" href="{% url 'msfitcaregym:blockuser' u.id True%}">Ενεργός</a>{%endif%}
+                                        </td>
+                                    </tr>
+                                    {%endif%}
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<script>
+$(document).ready(function () {
+
+  var table =  $('#exampleInTab').DataTable({
+        "language": {
+                "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+                "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+                "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+                "search": "Αναζήτηση",
+                "paginate": {
+                    "first":      "Πρώτη",
+                    "last":       "Τελευταία",
+                    "next":       "Επόμενη",
+                    "previous":   "Προηγούμενη"
+                },
+                "infoEmpty": "Καμία Εγγραφή",
+                "infoFiltered": "(filtered from _MAX_ total records)"
+             },
+        dom: 'B<"clear">lfrtip',
+                 buttons:{
+                     name:'primary',
+                     buttons: [
+
+                         { extend: 'copy', text: 'Αντιγραφή' },
+                         { extend: 'pdf', text: 'PDF' },
+                         { extend: 'excel', text: 'Excel' },
+                         { extend: 'print', text: 'Εκτύπωση' },
+
+                         // 'copy','pdf','excel'
+                     ]
+                 },
+             color : 'black',
+             opacity: 0.8
+            }
+    );
+});
+</script>
+{% endblock %}

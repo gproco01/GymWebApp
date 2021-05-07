@@ -1,0 +1,99 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block title %}
+    <title>Days Closed</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+
+<style>
+    table {
+    table-layout:fixed;
+    }
+    td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    }
+    @media only screen and (max-width: 480px) {
+    /* horizontal scrollbar for tables if mobile screen */
+    .tablemobile {
+        overflow-x: auto;
+        display: block;
+    }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(256,256,256,0.9);">
+        <div class="container">
+            <div class="row" >
+                <div class="col">
+                    <!-- Nav tabs -->
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="repeating">
+                            <h2>User Cards</h2>
+                            <table id="repeatingTable" class="table table-striped row-border tablemobile">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Comments</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for card in cards %}
+                                    <tr>
+                                        <td>{{card.title}}</td>
+                                        <td>{{card.comments}}</td>
+                                        <td><a href="{%url 'msfitcaregym:displayhumanbody1' card.pk %}">Open</a></td>
+                                    </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}
+<script>
+$(document).ready(function () {
+    $('#repeatingTable').DataTable({
+        "language": {
+            "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+            "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+            "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+            "search": "Αναζήτηση",
+            "paginate": {
+                "first":      "Πρώτη",
+                "last":       "Τελευταία",
+                "next":       "Επόμενη",
+                "previous":   "Προηγούμενη"
+            },
+            "infoEmpty": "Καμία Εγγραφή",
+            "infoFiltered": "(filtered from _MAX_ total records)"
+         },
+    }
+    );
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables({ visible: true, api: true })).DataTable()
+           .columns.adjust()
+    });
+});
+</script>
+
+{% endblock %}

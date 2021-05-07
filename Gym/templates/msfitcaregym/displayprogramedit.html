@@ -1,0 +1,128 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+{% load crispy_forms_tags %}
+
+{% block title %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{%static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+    <script type="text/javascript" src="https://github.com/niklasvh/html2canvas/releases/download/0.5.0-alpha1/html2canvas.js"></script>
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+
+</head>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+    <section class="page-section" >
+        <div class="container "><img class="img-fluid rounded about-heading-img mb-3 mb-lg-0" >
+            <div class="about-heading-content" id="program">
+                <div class="card shadow" id="program1">
+                        <div class="card-header py-3 text-center">
+                            <h3 class="text-primary m-0 font-weight-bold" style="font-family:Lucida Console;">MS FIT CARE GYM</h3>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong>Όνομα:{{userp.user.first_name}} {{userp.user.last_name}}</strong></div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong>Ημερομηνία:{{program.date}}</strong></div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong>Στόχος:{{program.goal}}</strong></div>
+                        </div>
+                        {%if request.user.groups.all.0.name == 'admin'%}
+                        <div class="col">
+                            <div class="form-group"><button id="add_day" class="btn btn-success" onclick="addDay('{{program.pk}}')">Προσθήκη Μέρας</button></div>
+                        </div>
+                        {%endif%}
+                        <div class="card-body">
+                            <div class="row">
+                                {% if program_days%}
+                                    {% for d in program_days%}
+                                            <div class="table-responsive col-md-6">
+                                                <table class="card-table table">
+                                                    <thead class="thead-dark">
+                                                        <tr>
+															<th scope="col">{%if request.user.groups.all.0.name == 'admin'%}<a href='/editday/{{d.pk}}/'>{{d.title}}</a>{%else%} {{d.title}} {%endif%}</th>
+                                                          <th scope="col">Σετ</th>
+                                                          <th scope="col">Επαναλήψεις</th>
+                                                            {%if request.user.groups.all.0.name == 'admin'%}
+                                                            <th><a class="btn btn-danger" id="delete_day" onclick="deleteProgram('{{d.pk}}')" >Διαγραφή Μέρας</a></th>
+                                                            {%endif%}
+                                                        </tr>
+                                                      </thead>
+                                                    <tbody>
+                                                        {% for e in d.exercises %}
+                                                        <tr style="color: #{{e.color}}">
+                                                          <td>{{e.id_exercises_id}} {%if e.negative%}(Αρνητικές Επαναλήψεις){%endif%}</td>
+                                                          <td>{{e.sets}}</td>
+                                                          <td>{{e.times}}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                      </tbody>
+                                                </table>
+                                            </div>
+                                    {% endfor %}
+                                {%else%}
+                                    <p>Το προγραμμα δεν έχει καταχωρηθεί</p>
+                                {%endif%}
+                                </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div id="elementH"></div>
+        <button id="export1" type="button" class="btn btn-success" onclick="printDiv('program')">Εκτύπωση</button>
+    </section>
+<script>
+   function printDiv(divName) {
+       document.getElementById("add_day").style.display="none";
+     var a = document.getElementsByClassName('btn-danger');
+     for (i=0;i<a.length;i++){
+         a[i].style.display="none";
+     }
+     var printContents = document.getElementById(divName).innerHTML;
+     var originalContents = document.body.innerHTML;
+
+     document.body.innerHTML = printContents;
+
+     window.print();
+
+     document.body.innerHTML = originalContents;
+     document.getElementById("add_day").style.display="block";
+     var a = document.getElementsByClassName('btn-danger');
+     for (i=0;i<a.length;i++){
+         a[i].style.display="block";
+     }
+}
+ function deleteProgram(pk){
+        console.log(pk)
+        if (confirm("Είστε σίγουροι ότι θέλετε να το διαγράψετε;")) {
+            var url = "{% url 'msfitcaregym:removeprogramday' 123 %}"
+            document.location.href = url.replace('123', pk);
+        }
+    }
+function addDay(pk){
+    console.log(pk)
+    $.ajax({
+        type: 'POST',
+        url: "{%url 'msfitcaregym:addextraday' %}",
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          program_id: pk,
+        },
+        success:function(data){
+          var url = "{% url 'msfitcaregym:programperday' %}"
+            document.location.href = url;
+        }
+     });
+    };
+</script>
+{% endblock %}

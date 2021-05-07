@@ -1,0 +1,46 @@
+{% extends 'msfitcaregym/base.html' %}
+{%load static%}
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+{% block body_block %}
+    <section class="page-section" >
+        <div class="container "><img class="img-fluid rounded about-heading-img mb-3 mb-lg-0" >
+            <div class="about-heading-content">
+                <div class="row">
+                    <div class="col-lg-10 col-xl-9 mx-auto">
+                        <div class="bg-faded rounded p-5">
+                            <h2 class="section-heading mb-4"><span class="section-heading-upper">MS Fit Care Gym</span><span class="section-heading-lower" style="color: #e6a756!important;">&nbsp;MS Fit Care Gym</span></h2>
+                            <p>{%if hometext%}{{hometext}}{%endif%}</p>
+                        </div>
+                        {%if request.user.groups.all.0.name == 'admin'%}
+                        <button data-toggle="modal" data-target="#exampleModal" class="btn btn-success">Προσθήκη Κειμένου</button>
+                        {%endif%}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Προσθήκη Κειμένου</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+           <form enctype="multipart/form-data" class="user" method="post" >
+              {%csrf_token%}
+              <div class="modal-body" id="modalbody">
+                {{form.as_p}}
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
+                  <input type="submit" class="btn btn-primary" style="background-color: #e6a756!important;" value="Αποθήκευση">
+              </div>
+           </form>
+        </div>
+      </div>
+</div>
+{% endblock %}

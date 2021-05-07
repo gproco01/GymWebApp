@@ -1,0 +1,49 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block title %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Login - Brand</title>
+    <link rel="stylesheet" href="{%static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="{%static 'fonts1/fontawesome-all.min.css' %}">
+</head>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(0, 0, 0, 1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-9 mx-auto">
+                    <div class="cta-inner text-center rounded">
+                        <div class="text-center">
+                             <h4 class="text-dark mb-4">Καλωσόρισες</h4>
+                            </div>
+                            <form class="user" method="post">
+                                {%csrf_token%}
+                                <div class="form-group"><input class="form-control form-control-user" type="text" id="username" aria-describedby="emailHelp" placeholder="Email" name="username"></div>
+                                <div class="form-group"><input class="form-control form-control-user" type="password" id="exampleInputPassword" placeholder="Κωδικός" name="password"></div>
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <p class="{{ message.tags }}" style="color: red;">
+                                        {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                                        </p>
+                                    {% endfor %}
+                                {% endif %}
+                                <button class="btn btn-primary btn-block text-white btn-user" type="submit">Είσοδος</button>
+                                <hr>
+                            </form>
+                            <div class="text-center"><a class="small" href="{%url 'msfitcaregym:password_reset'%}">Ξεχάσατε τον κωδικό σας;</a></div>
+                            <div class="text-center"><a class="small" href="{%url 'msfitcaregym:register'%}">Δημιουργία Λογαριασμού</a></div>
+                        </div>
+                </div>
+            </div>
+        </div>
+</section>
+{% endblock %}

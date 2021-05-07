@@ -1,0 +1,80 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static %}
+
+
+{% block title %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>About Us - Brand</title>
+    <link rel="stylesheet" href="{%static 'bootstrapau/css/bootstrap.min.css'%}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i,600,600i">
+    <link rel="stylesheet" href="{%static 'fontsau/simple-line-icons.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.css">
+    <link rel="stylesheet" href="{%static 'cssau/smoothproducts.css' %}">
+{%endblock%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+        <br>
+        <section class="clean-block about-us">
+            <div class="container">
+                <div class="block-heading">
+<!--                    <h2 class="text-info" style="color: #e6a756!important;">About Us</h2>-->
+                    <p></p>
+                </div>
+                <div class="row justify-content-center">
+                    {% for a in about %}
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="card clean-card text-center"><img class="card-img-top w-100 d-block" src="{{ a.photo.url }}">
+                            <div class="card-body info">
+                                <h4 class="card-title">{{a.name}}</h4>
+                                <p class="card-text">{{a.details}}</p>
+                            </div>
+                            {%if request.user.groups.all.0.name == 'admin'%}
+                            <a class="btn btn-danger" onclick="deleteSlot('{{a.pk}}')" >Αφαίρεση</a>
+                            {%endif%}
+                        </div>
+                    </div>
+                    {%endfor%}
+                </div>
+            </div>
+            {%if request.user.groups.all.0.name == 'admin'%}
+            <button data-toggle="modal" data-target="#exampleModal" class="btn btn-success">Προσθήκη Συνεργάτη</button>
+            {%endif%}
+        </section>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Προσθήκη Συνεργάτη</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+           <form enctype="multipart/form-data" class="user" method="post" >
+              {%csrf_token%}
+              <div class="modal-body" id="modalbody">
+                {{form.as_p}}
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
+                  <input type="submit" class="btn btn-primary" style="background-color: #e6a756!important;" value="Αποθήκευση">
+              </div>
+           </form>
+        </div>
+      </div>
+</div>
+<script>
+    function deleteSlot(pk){
+        console.log(pk)
+        if (confirm("Είστε σίγουροι ότι θέλετε να το διαγράψετε;")) {
+            var url = "{% url 'msfitcaregym:removeaboutus' 123 %}"
+            document.location.href = url.replace('123', pk);
+        }
+    }
+</script>
+{%endblock%}

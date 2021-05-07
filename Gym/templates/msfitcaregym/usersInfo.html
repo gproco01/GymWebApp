@@ -1,0 +1,254 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block title %}
+    <title>User's Information</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+
+<style>
+    table {
+    table-layout:fixed;
+    }
+    td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    }
+    @media only screen and (max-width: 480px) {
+    /* horizontal scrollbar for tables if mobile screen */
+    .tablemobile {
+        overflow-x: auto;
+        display: block;
+    }
+    }
+    </style>
+{% endblock %}
+
+{% block body_block %}
+<section class="page-section cta" style="background-color: rgba(256,256,256,0.9);">
+        <div class="container">
+            <div class="row" >
+                <div class="col">
+                 <a class="btn btn-success" href="{% url 'msfitcaregym:adminRegistrationForm'%}">Προσθήκη Χρήστη</a>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item border rounded">
+                            <a class="nav-link border rounded shadow-none active" href="#allusers" role="tab" data-toggle="tab" id="1">Όλοι οι Χρήστες</a>
+                        </li>
+                        <li class="nav-item border rounded">
+                            <a class="nav-link border rounded shadow-none" href="#noUser" role="tab" data-toggle="tab" id="3">Χωρίς Λογαριασμό</a>
+                        </li>
+                        <li class="nav-item border rounded">
+                            <a class="nav-link border rounded shadow-none" href="#accepted" role="tab" data-toggle="tab" id="2">Αιτήματα</a>
+                        </li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="allusers">
+                            <table id="exampleInTab" class="table table-striped row-border tablemobile">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Όνομα</th>
+                                    <th scope="col">Επίθετο</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Ημ.Εγγραφής</th>
+                                    <th scope="col">Κατάσταση</th>
+                                    <th scope="col">Φόρμα Εγγραφής</th>
+                                    <th scope="col">Ιστορικό Κρατήσεων</th>
+                                    <th scope="col"></th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in users%}
+                                    <tr>
+                                        <td>{{u.first_name}}</a></td>
+                                        <td>{{u.last_name}}</td>
+                                        <td>{{u.user.username}}</td>
+                                        <td>{{u.user.date_joined}}</td>
+                                        <td>{{u.accountStatus}}</td>
+                                        <td><a class="btn btn-primary" href="/displayForm/{{u.id}}/">Προβολή</a></td>
+                                        <td><a class="btn btn-primary" href="{%url 'msfitcaregym:adminReservations' u.id %}">Προβολή</a></td>
+                                        <td>{% if u.accountStatus == 'Accepted' %}<a class="btn btn-danger" href="{% url 'msfitcaregym:usersinfoblock' u.id False%}">Μη Ενεργός</a>
+                                        {%else%} <a class="btn btn-success" href="{% url 'msfitcaregym:usersinfoblock' u.id True%}">Ενεργός</a>{%endif%}
+                                        </td>
+                                    </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="accepted">
+                            <table id="example" class="table table-striped row-border tablemobile">
+                                <thead>
+                                   <tr>
+                                       <th scope="col">Όνομα</th>
+                                       <th scope="col">Επίθετο</th>
+                                       <th scope="col">Email</th>
+                                       <th scope="col">Ημ.Εγγραφής</th>
+                                       <th scope="col">Αποδοχή/Απόρριψη</th>
+                                   </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in req%}
+                                    <tr>
+                                        <td>{{u.first_name}}</a></td>
+                                        <td>{{u.last_name}}</td>
+                                        <td>{{u.user.username}}</td>
+                                        <td>{{u.user.date_joined}}</td>
+                                        <td><a href="{% url 'msfitcaregym:usersRequestApprovalChange' u.id True%}"><i class="fas fa-user-check"></i></a>
+                                        <a href="{% url 'msfitcaregym:usersRequestApprovalChange' u.id False%}"><i class="fas fa-user-times"></i></a></td>
+                                    </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="noUser">
+                            <table id="example1" class="table table-striped row-border tablemobile">
+                                <thead>
+                                   <tr>
+                                       <th scope="col">Όνομα</th>
+                                       <th scope="col">Επίθετο</th>
+                                        <th scope="col">Φόρμα Εγγραφής</th>
+                                       <th scope="col">Ιστορικό Κρατήσεων</th>
+                                       <th scope="col"></th>
+                                   </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in no_users%}
+                                    <tr>
+                                        <td>{{u.first_name}}</a></td>
+                                        <td>{{u.last_name}}</td>
+                                        <td><a class="btn btn-primary" href="/displayForm/{{u.id}}/">Προβολή</a></td>
+                                        <td><a class="btn btn-primary" href="{%url 'msfitcaregym:adminReservations' u.id %}">Προβολή</a></td>
+                                        <td><a class="btn btn-success" data-toggle="modal" data-target="#addUser" onclick="createUser('{{u.pk}}')">Δημιουργία Λογαριασμού</a></td>
+                                    </tr>
+                                    {% endfor%}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Δημιουργία Λογαριασμου</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+           <form enctype="multipart/form-data" class="user" method="post" >
+              {%csrf_token%}
+              <div class="modal-body" id="modalbody">
+                  <input type="hidden" name="user" id="user">
+                  <label for="email">Email:</label>
+                  <input type="email" name="email" id="email">
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary" style="background-color: #e6a756!important;" value="Δημιουργία">
+              </div>
+           </form>
+        </div>
+      </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    $('#example').DataTable({
+        "language": {
+                "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+                "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+                "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+                "search": "Αναζήτηση",
+                "paginate": {
+                    "first":      "Πρώτη",
+                    "last":       "Τελευταία",
+                    "next":       "Επόμενη",
+                    "previous":   "Προηγούμενη"
+                },
+                "infoEmpty": "Καμία Εγγραφή",
+                "infoFiltered": "(filtered from _MAX_ total records)"
+             },
+
+    });
+
+    $('#example1').DataTable({
+        "language": {
+                "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+                "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+                "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+                "search": "Αναζήτηση",
+                "paginate": {
+                    "first":      "Πρώτη",
+                    "last":       "Τελευταία",
+                    "next":       "Επόμενη",
+                    "previous":   "Προηγούμενη"
+                },
+                "infoEmpty": "Καμία Εγγραφή",
+                "infoFiltered": "(filtered from _MAX_ total records)"
+             },
+
+    });
+
+
+    $('#exampleInTab').DataTable({
+        "rowCallback":function (row,data,index){
+                if (data[4]=='Accepted'){
+                    $('td:eq(4)',row).html("Ενεργός")
+                }
+                else if (data[4]=='Rejected') {
+                    $('td:eq(4)',row).html("Απορρίφθηκε")
+                }
+                else if (data[4]=='Request'){
+                    $('td:eq(4)',row).html("Αίτημα")
+                }
+                else if (data[4]=='NoUser'){
+                    $('td:eq(4)',row).html("Χωρίς Λογαριασμό")
+                }
+                else if (data[4]=='Revoke'){
+                    $('td:eq(4)',row).html("Μη Ενεργός")
+                }
+            },
+        "language": {
+                "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+                "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+                "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+                "search": "Αναζήτηση",
+                "paginate": {
+                    "first":      "Πρώτη",
+                    "last":       "Τελευταία",
+                    "next":       "Επόμενη",
+                    "previous":   "Προηγούμενη"
+                },
+                "infoEmpty": "Καμία Εγγραφή",
+                "infoFiltered": "(filtered from _MAX_ total records)"
+             },
+        }
+    );
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables({ visible: true, api: true })).DataTable()
+           .columns.adjust()
+    });
+});
+</script>
+
+<script>
+    function createUser(pk){
+        document.getElementById("user").value=pk
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+{% load crispy_forms_tags %}
+
+{% block title %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{%static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+    <script type="text/javascript" src="https://github.com/niklasvh/html2canvas/releases/download/0.5.0-alpha1/html2canvas.js"></script>
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+</head>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+    <section class="page-section" >
+        <div class="container "><img class="img-fluid rounded about-heading-img mb-3 mb-lg-0" >
+            <div class="about-heading-content" id="program">
+                <div class="card shadow" id="program1">
+                        <div class="card-header py-3 text-center">
+                            <h3 class="text-primary m-0 font-weight-bold" style="font-family:Lucida Console;">ΣΥΝΔΡΟΜΕΣ</h3>
+                        </div>
+                        <div class="col">
+                            <div class="form-group"><strong>Όνομα:{{userprof.user.first_name}} {{userprof.user.last_name}}</strong></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% if payments%}
+                                <div class="table-responsive">
+                                    <table class="card-table table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                              <th scope="col">Πληρωμή Από</th>
+                                              <th scope="col">Πληρωμή Μέχρι</th>
+                                              <th scope="col">Πακέτο Πληρωμής</th>
+                                                <th scope="col">Τιμή</th>
+                                            </tr>
+                                          </thead>
+                                        <tbody>
+                                            {% for p in payments %}
+                                            <tr>
+                                              <td>{{p.pay_from}}</td>
+                                                {%if payment.pay_until == p.pay_unlit and over%}
+                                              <td style="background-color: red;color: black">{{p.pay_until}}</td>
+                                                {%else%}
+                                                <td style="background-color: darkgreen;color: black">{{p.pay_until}}</td>
+                                                {%endif%}
+                                              <td>{{p.package}}</td>
+                                                <td>{{p.price}}</td>
+                                            </tr>
+                                            {% endfor %}
+                                          </tbody>
+                                    </table>
+                                </div>
+                                {%else%}
+                                    <p>Δεν υπάρχει καταχωρημένη συνδρομή</p>
+                                {%endif%}
+                                </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

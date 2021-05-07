@@ -1,0 +1,75 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+{% load crispy_forms_tags %}
+
+{% block title %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{%static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+</head>
+{% endblock %}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block body_block %}
+    <section class="page-section">
+        <div class="container "><img class="img-fluid rounded about-heading-img mb-3 mb-lg-0" >
+            <div class="about-heading-content">
+                <div class="card shadow">
+                        <div class="card-header py-3">
+                            <p class="text-primary m-0 font-weight-bold">Πρόγραμμα Χρήστη</p>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {%csrf_token%}
+                                <div class="form-row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <strong>
+                                                <label>Επιλογή Χρήστη</label>
+                                                <select class="col-lg-6 col-md-6 col-sm-6" name="users" id="users" required>
+                                                    {% for u in users %}
+                                                    <option value="{{u.pk}}" >{{u}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div class="form-group">
+                                     <button class="btn btn-primary " type="submit">Επεξεργασία Προγράμματος</button>
+                                 </div>
+                            </form>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<script>
+document.getElementById('users').selectedIndex=-1
+$( document ).ready(function() {
+    $('#users').multiselect({
+      maxHeight: 300,
+      enableCollapsibleOptGroups: true,
+      enableClickableOptGroups: true,
+      enableFiltering: true,
+      enableCaseInsensitiveFiltering: true,
+      filterBehavior: 'text',
+      // filterPlaceholder: 'Όνομα Κινδύνου',
+      nonSelectedText: 'Καμία επιλογή',
+      buttonWidth: '300px',
+      nSelectedText: 'Επιλογές',
+      allSelectedText: 'Όλες οι Επιλογές',
+      numberDisplayed: 1
+    });
+});
+</script>
+<script src="{% static 'js/bootstrap-multiselect.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-multiselect.css' %}">
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'msfitcaregym/base.html' %}
+{% load static%}
+
+{% block bg %}
+    style="background:linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));"
+{% endblock %}
+
+{% block title %}
+    <title>User's Payments</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Register - Brand</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+
+<style>
+    table {
+    table-layout:fixed;
+    }
+    td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    }
+    @media only screen and (max-width: 480px) {
+    /* horizontal scrollbar for tables if mobile screen */
+    .tablemobile {
+        overflow-x: auto;
+        display: block;
+    }
+    }
+    </style>
+{% endblock %}
+
+{% block body_block %}
+
+<section class="page-section rounded" style="background-color: hsla(0,0%,100%,.95);">
+    <div class="card-header py-3">
+        <p class="text-primary m-0 font-weight-bold">Κρατήσεις {{people.first_name}} {{people.last_name}}</p>
+    </div>
+    <br>
+        <div class="container">
+            <select id="type" onchange="reload()">
+                    <option value="all">Όλα</option>
+                    <option value="physio">Φυσιοθεραπευτήριο</option>
+                    {% for type in types %}
+                        <option value="{{type.pk}}">{{type.Title}}</option>
+                    {% endfor %}
+                </select>
+            <div class="row" >
+
+                <div class="col">
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="allusers">
+                            <table id="reservations" class="table table-striped row-border tablemobile" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Είδος</th>
+                                    <th scope="col">Ημερομηνία</th>
+                                    <th scope="col">Έναρξη</th>
+                                    <th scope="col">Λήξη</th>
+                                </tr>
+                                </thead>
+                                <tbody></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+{% endblock %}
+{% block footer %}
+<script>
+    $( document ).ready(function() {
+        $('#reservations').dataTable({
+            "language": {
+                "lengthMenu": "Προβολή _MENU_ εγγραφών ανά σελίδα",
+                "zeroRecords": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+                "info": "Προβολή σελίδας _PAGE_ από _PAGES_",
+                "search": "Αναζήτηση",
+                "paginate": {
+                    "first": "Πρώτη",
+                    "last": "Τελευταία",
+                    "next": "Επόμενη",
+                    "previous": "Προηγούμενη"
+                },
+                "infoEmpty": "Καμία Εγγραφή",
+                "infoFiltered": "(filtered from _MAX_ total records)"
+            },
+            destroy: true,
+            processing: true,
+            "ajax": {
+                type: "POST",
+                url: "{%url 'msfitcaregym:showReservations' %}",
+                data: function (d) {
+                    d.csrfmiddlewaretoken = '{{ csrf_token }}';
+                    d.pk = "{{people.pk}}";
+                    d.type = document.getElementById('type').value;
+                },
+                dataSrc: "",
+                // dataType: "json",
+            },
+            columns: [
+                {data: "type"},
+                {data: "date"},
+                {data: "start"},
+                {data: "end"},
+
+            ]
+
+        })
+    })
+</script>
+<script>
+    function reload(){
+        $('#reservations').DataTable().ajax.reload()
+    }
+</script>
+{% endblock %}
