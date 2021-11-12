@@ -3,6 +3,10 @@ import random
 import string
 from datetime import datetime, timedelta, date
 
+import pytz
+from django.db import connection
+
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -18,6 +22,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.views.generic.edit import CreateView
+from django.contrib.auth.models import Group
 
 from . import forms, models
 from django.urls import reverse
@@ -52,17 +57,20 @@ def index(request):
 @login_required()
 @registration_completed()
 def dashboard(request):
+    tz_CY = pytz.timezone('Europe/Athens')
     user = request.user
     userprof = models.UserProfile.objects.get(user=user)
     reservations = models.GymReservations.objects.filter(user=userprof, date__gte=datetime.today()).order_by('date')[:5]
     if reservations.count() == 1:
         next = reservations[0]
-        if next.time.start_time > datetime.now().time():
+        if next.date == datetime.today().date() and datetime.now(tz_CY).time() > next.time.start_time:
             next = "Δεν υπάρχει κάποια κράτηση"
+            reservations = None
     elif reservations.count() > 1:
         next = reservations[0]
-        if next.date == datetime.today() and next.time.start_time > datetime.now().time():
+        if next.date == datetime.today().date() and datetime.now(tz_CY).time() > next.time.start_time:
             next = reservations[1]
+            reservations = models.GymReservations.objects.filter(user=userprof, date__gte=datetime.today()).order_by('date')[1:5]
     else:
         next = "Δεν υπάρχει κάποια κράτηση"
     try:
@@ -79,7 +87,15 @@ def dashboard(request):
         over = "Δεν έχει καταχωρηθεί"
 
     try:
-        physio = models.PhysioReservations.objects.filter(user=userprof, date__gte=datetime.today()).latest('date')
+        allphysios = models.PhysioReservations.objects.filter(user=userprof, date__gte=datetime.today()).order_by('date')
+        if allphysios.count() == 1:
+            physio = allphysios[0]
+            if physio.date == datetime.today().date() and datetime.now(tz_CY).time() > physio.start_time:
+                physio = None
+        elif allphysios.count() > 1:
+            physio = allphysios[0]
+            if physio.date == datetime.today().date() and datetime.now(tz_CY).time() > physio.start_time:
+                physio = allphysios[1]
     except:
         physio = None
     context = {
@@ -88,7 +104,7 @@ def dashboard(request):
         'over': over,
         'reservations': reservations,
         'physio': physio,
-        'tab': 'dash'
+        'tab': 'dash',
     }
     return render(request, 'msfitcaregym/dashboard.html', context)
 
@@ -100,6 +116,7 @@ def Register(request):
         if user_form.is_valid():
             user = user_form.save(commit=False)
             user.is_active = False
+            user.email = user.username
             user.save()
             userProfile = models.UserProfile(user=user, first_name=user.first_name, last_name=user.last_name)
             userProfile.save()
@@ -122,6 +139,7 @@ def Login(request):
         return redirect('msfitcaregym:home')
     else:
         if request.method == 'POST':
+            # print(request.POST)
             username = request.POST['username']
             password = request.POST['password']
             user = authenticate(request, username=username, password=password)
@@ -168,12 +186,12 @@ def password_reset_request(request):
             associated_users = models.User.objects.filter(Q(username=data))
             if associated_users.exists():
                 for user in associated_users:
-                    subject = "Password Reset Requested"
+                    subject = "Αίτημα για επαναφορά κωδικού πρόσβασης"
                     email_template_name = "password/password_reset_email.txt"
                     c = {
-                        "email": user.email,
-                        'domain': '127.0.0.1:12345',
-                        'site_name': 'Website',
+                        "email": user.username,
+                        'domain': 'msfitcaregym.com',
+                        'site_name': 'MSFitCareGym',
                         "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                         "user": user,
                         'token': default_token_generator.make_token(user),
@@ -181,7 +199,7 @@ def password_reset_request(request):
                     }
                     email = render_to_string(email_template_name, c)
                     try:
-                        send_mail(subject, email, 'admin@example.com', [user.email], fail_silently=False)
+                        send_mail(subject, email, settings.EMAIL_HOST_USER, [user.username], fail_silently=False)
                     except BadHeaderError:
                         return HttpResponse('Invalid header found.')
                     return redirect("/password_reset/done/")
@@ -195,7 +213,7 @@ def password_reset_request(request):
 def adminPhysioCalendar(request):
     # users=models.UserProfile.objects.filter(accountStatus="Accepted")
     users = models.UserProfile.objects.filter(accountStatus__in=['Accepted', 'NoUser'])
-    print("users: ", users)
+    # print("users: ", users)
     context = {
         "users": users
     }
@@ -238,11 +256,11 @@ def addPhysioSlot(request):
 
 
 def toArray(events, color=None, title=0):
-    print(events)
+    # print(events)
     events_array = []
     for event in events:
-        print(event)
-        print("ev ", event)
+        # print(event)
+        # print("ev ", event)
         event_array = {}
         if title == 1:
             event_array['title'] = str(event.user.first_name) + " " + str(event.user.last_name)
@@ -450,7 +468,7 @@ def addSlots(request):
         valid_from = today + timedelta(days=5)
     else:
         valid_from = datetime.strptime(valid_from, '%Y-%m-%d')
-    print(valid_from)
+    # print(valid_from)
     valid_to = valid_from + timedelta(days=-1)
     old_slots = models.Slots.objects.filter(type_id=type, valid_to=None) | models.Slots.objects.filter(type_id=type,
                                                                                                        valid_to__gt=valid_to)
@@ -476,7 +494,7 @@ def addSlots(request):
 
 
 def slotsToArray(type, day, slots, status, color=None):
-    print(slots)
+    # print(slots)
     events_array = []
     total_persons = models.Type.objects.get(id_type=type).total_persons
     for slot in slots:
@@ -506,10 +524,10 @@ def slotsToArray(type, day, slots, status, color=None):
 
 
 def userReservToArray(resrvations, color=None):
-    print(resrvations)
+    # print(resrvations)
     events_array = []
     for resrvation in resrvations:
-        print("ev ", resrvation)
+        # print("ev ", resrvation)
         event_array = {}
         event_array['title'] = "Η κράτηση μου"
         event_array['id'] = resrvation.id_reservation
@@ -570,7 +588,7 @@ def gymSlotsJSON(request):
                     month=day.strftime("%m"), day=day.strftime("%d"),
                     valid_from__lte=day.strftime("%Y-%m-%d"), ).exclude(
                     valid_to__lt=day.strftime("%Y-%m-%d")).count() == 0:
-                print(date.today())
+                # print(date.today())
                 if day.strftime("%Y-%m-%d") == datetime.today().strftime("%Y-%m-%d"):
                     slots = models.Slots.objects.filter(day=day.isoweekday(), type_id=int(type),
                                                         start_time__gte=datetime.today().strftime("%H:%M:%S"),
@@ -627,7 +645,7 @@ def adminGymCalendar(request, pk):
         type = models.Type.objects.get(pk=pk)
         if pk:
             users = models.UserProfile.objects.filter(accountStatus__in=['Accepted', 'NoUser'])
-            print("users: ", users)
+            # print("users: ", users)
             context = {
                 "users": users,
                 'type': type
@@ -676,10 +694,10 @@ def gymAdminReservations(request):
             # "pk": user.id_reservation
         }
         data.append(d)
-    print(data)
+    # print(data)
 
     data = JsonResponse(data, safe=False)
-    print(data)
+    # print(data)
     return data
 
 
@@ -729,8 +747,8 @@ def gymUserRemoveReservation(request):
 def daysClosed(request):
     daysClosed = models.daysClosed.objects.filter(date__gte=date.today())
     repeatingDaysClosed = models.repeatingDaysClosed.objects.all().exclude(valid_to__lt=date.today())
-    print(daysClosed)
-    print(repeatingDaysClosed)
+    # print(daysClosed)
+    # print(repeatingDaysClosed)
     context = {
         "daysClosed": daysClosed,
         "repeatingDaysClosed": repeatingDaysClosed
@@ -742,7 +760,7 @@ def daysClosed(request):
 @allowed_users(['admin'])
 def addDayClosed(request):
     if request.POST:
-        print("post")
+        # print("post")
         date = request.POST.get("date", None)
         date = datetime.strptime(date, '%Y-%m-%d')
         repeating = request.POST.get('isRepeating', None)
@@ -820,7 +838,7 @@ def showReservations(request):
             'end':reservation.time.end_time
         }
         data.append(d)
-    print(data)
+    # print(data)
     for reservation in reservationsPhysio:
         d = {
             "type": 'Φυσιοθεραπευτήριο',
@@ -829,10 +847,10 @@ def showReservations(request):
             'end':reservation.end_time
         }
         data.append(d)
-    print(data)
+    # print(data)
 
     data = JsonResponse(data, safe=False)
-    print(data)
+    # print(data)
     return data
 
 
@@ -849,14 +867,14 @@ def adminRegistrationForm(request):
                 user = models.User(first_name=rform.first_name, last_name=rform.last_name,
                                    email=request.POST.get('email'), username=request.POST.get('email'), is_active=True)
                 password = get_random_password_string(10)
-                print(password)
+                # print(password)
                 user.set_password(password)
                 user.save()
                 rform.user = user
                 rform.accountStatus = 'Accepted'
 
-                subject = 'MS Fit Care Gym Λογαριασμός'
-                message = f'{rform.first_name} καλωσόρισες, το MS Fit Care Gym σας έχει δημιουργήσει λογαριασμό στo 127.0.0.1:12345.' \
+                subject = 'MSFitCareGym Λογαριασμός'
+                message = f'{rform.first_name} καλωσόρισες, το MSFitCareGym σας έχει δημιουργήσει λογαριασμό στo msfitcaregym.com' \
                           f'Μπορείτε να εισέλθετε στο λογαριασμό σας με το email {user.username} και τον κωδικό {password}'
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = [user.username, ]
@@ -1031,7 +1049,7 @@ def DisplayHumanBody1(request, pk=None):
     if pk:
         card = models.PhysioCard.objects.get(pk=pk)
         bodyparts = models.BodyParts.objects.filter(physio_card_id=pk)
-        print(bodyparts)
+        # print(bodyparts)
         context = {
             'card_id': pk,
             'card': card,
@@ -1215,15 +1233,21 @@ def UsersInfo(request):
         profile.user = user
         profile.accountStatus = "Accepted"
         password = get_random_password_string(10)
-        print(password)
+        # print(password)
         user.set_password(password)
         user.save()
         profile.save()
+        subject = 'MSFitCareGym Λογαριασμός'
+        message = f'{profile.first_name} καλωσόρισες, το MSFitCareGym σας έχει δημιουργήσει λογαριασμό στo msfitcaregym.com' \
+                  f'Μπορείτε να εισέλθετε στο λογαριασμό σας με το email {user.username} και τον κωδικό {password}'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [user.username, ]
+        send_mail(subject, message, email_from, recipient_list)
         return HttpResponseRedirect(reverse('msfitcaregym:usersinfo'))
     users = models.UserProfile.objects.filter(accountStatus__in=['Accepted', 'Rejected', 'Revoke'])
-    print(users)
+    # print(users)
     request_users = models.UserProfile.objects.filter(accountStatus='Request')
-    print(request_users)
+    # print(request_users)
     no_users = models.UserProfile.objects.filter(accountStatus='NoUser')
     context = {
         'users': users,
@@ -1245,13 +1269,13 @@ def userRequestApprovalChange(request, pk=None, acc=None):
     if pk:
         userProfile = get_object_or_404(models.UserProfile, pk=pk)
         user = get_object_or_404(models.User, pk=userProfile.user.pk)
-        print(user)
+        # print(user)
 
         if acc == "True":
             userProfile.accountStatus = "Accepted"
             user.is_active = True
-            subject = 'MS Fit Care Gym Λογαριασμός'
-            message = f'{user.first_name} καλοσώρισες, το MS Fit Care Gym σας έχει ενεργοποίησει τον λογαριασμό σας' \
+            subject = 'MSFitCareGym Λογαριασμός'
+            message = f'{user.first_name} καλωσόρισες, το MSFitCareGym σας έχει ενεργοποίησει τον λογαριασμό σας' \
                       f'Μπορείτε να εισέλθετε στο λογαριασμό σας με το email {user.username}'
             email_from = settings.EMAIL_HOST_USER
             recipient_list = [user.username, ]
@@ -1391,7 +1415,7 @@ def UserProgramPerDayEdit(request):
     try:
         program = models.ProgramUser.objects.filter(user_id=userProf.pk).latest('date')
         program_days = models.ProgramDates.objects.filter(program=program).order_by('title')
-        print(program_days)
+        # print(program_days)
 
         for p in program_days:
             exercises = models.ExercisesPerDate.objects.filter(id_program_Date=p.pk).values()
@@ -1555,12 +1579,18 @@ def userPayments(request, pk=None):
         try:
             userprof = models.UserProfile.objects.get(pk=pk)
             payments = models.Payments.objects.filter(user=userprof).order_by('-pay_until')
+            today = datetime.today().date()
+            for p in payments:
+                if today > p.pay_until:
+                    p.over = True
+                else:
+                    p.over = False
         except:
             payments = None
 
         context = {
             'payments': payments,
-            'userprof': userprof
+            'userprof': userprof,
         }
         return render(request, 'msfitcaregym/userpayments.html', context)
 
@@ -1573,23 +1603,20 @@ def paymentsUser(request):
         userprof = models.UserProfile.objects.get(user=user)
         payments = models.Payments.objects.filter(user=userprof).order_by('-pay_until')
         payment = models.Payments.objects.filter(user=userprof).latest('pay_until')
-        today = datetime.now()
-        day = datetime.strptime(payment.pay_until.strftime('%Y%m%d'), '%Y%m%d')
-        daysdifference = (today - day).days
-        if daysdifference > 0:
-            over = True
-        else:
-            over = False
+        today = datetime.today().date()
+        for p in payments:
+            if today > p.pay_until:
+                p.over = True
+            else:
+                p.over = False
     except:
         payments = None
         payment = None
         userprof = models.UserProfile.objects.get(user=user)
-        over = None
 
     context = {
         'payments': payments,
         'userprof': userprof,
-        'over': over,
         'payment': payment
     }
     return render(request, 'msfitcaregym/userpayments.html', context)
@@ -1695,7 +1722,7 @@ def saveModaltest(request):
     y = request.POST['y']
     circle_id = request.POST['circle_id']
     color = request.POST['color']
-    print(color)
+    # print(color)
     try:
         body = models.BodyParts.objects.get(physio_card_id=card_id, circle_id=circle_id, x=x, y=y)
     except:
@@ -1734,7 +1761,7 @@ def removeBodyPart(request):
     y = request.POST['y']
     circle_id = request.POST['circle_id']
     color = request.POST['color']
-    print(color)
+    # print(color)
     try:
         body = models.BodyParts.objects.get(physio_card_id=card_id, circle_id=circle_id, x=x, y=y, details=comments)
         body.delete()
@@ -1832,6 +1859,7 @@ def remove_exercise(request, pk=None):
     if pk:
         models.Exercises.objects.filter(pk=pk).delete()
         return HttpResponseRedirect(reverse('msfitcaregym:allexercises'))
+
 
 def addhours():
     models.WorkingHours.objects.update_or_create(day= "Κυριακή", time= "Κλειστό" )
@@ -1999,18 +2027,3 @@ def addExercises():
     models.Exercises.objects.update_or_create(name="Rope", category_id=9)
     models.Exercises.objects.update_or_create(name="Jumping Jack", category_id=9)
     models.Exercises.objects.update_or_create(name="Skip", category_id=9)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
